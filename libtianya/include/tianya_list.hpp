@@ -49,38 +49,38 @@ public:
 			const list_info& data = item.second;
 			std::size_t tab = 0;
 
-			std::string buffer;
+			std::wstring buffer;
 
 			tab = (120 - (data.title.size() - 3)) / 4;
-			buffer = data.title;
+			buffer = ansi_wide(data.title);
 			for (int i = 0; i < tab; i++)
-				buffer += "\t";
+				buffer += L"\t";
 
 			tab = (32 - (data.author.size() - 3)) / 4;
-			buffer += data.author;
+			buffer += ansi_wide(data.author);
 			for (int i = 0; i < tab; i++)
-				buffer += "\t";
+				buffer += L"\t";
 
 			std::string tmp = std::to_string(data.hits);
 			tab = (32 - (tmp.size() - 3)) / 4;
-			buffer += tmp;
+			buffer += ansi_wide(tmp);
 			for (int i = 0; i < tab; i++)
-				buffer += "\t";
+				buffer += L"\t";
 
 			tmp = std::to_string(data.replys);
 			tab = (32 - (tmp.size() - 3)) / 4;
-			buffer += tmp;
+			buffer += ansi_wide(tmp);
 			for (int i = 0; i < tab; i++)
-				buffer += "\t";
+				buffer += L"\t";
 
-			buffer += data.post_time;
+			buffer += ansi_wide(data.post_time);
 			tab = (32 - (data.post_time.size() - 3)) / 4;
 			for (int i = 0; i < tab; i++)
-				buffer += "\t";
+				buffer += L"\t";
 
-			buffer += data.post_url;
-			buffer += "\n";
-			std::fputs(buffer.c_str(), fp);
+			buffer += ansi_wide(data.post_url);
+			buffer += L"\n";
+			std::fputws(buffer.c_str(), fp);
 		}
 		std::fclose(fp);
 	}
@@ -184,7 +184,7 @@ protected:
 			m_response.consume(bytes_transferred);
 
 			// 转成ansi, 主要是因为下面要搜索"下一页"这个字符串.
-			html_line = utf8_ansi(html_line, "GBK");
+			html_line = utf8_ansi(html_line);
 
 			// 开始状态分析.
 			switch (m_state)
