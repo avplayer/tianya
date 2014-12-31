@@ -180,30 +180,30 @@ protected:
 
 			// 取出response的数据到message.
 			const char* begin = boost::asio::buffer_cast<const char*>(m_response.data());
-			std::string html_line = std::string(begin, begin + bytes_transferred);
+			std::string line = std::string(begin, begin + bytes_transferred);
 			m_response.consume(bytes_transferred);
 
 			// 转成ansi, 主要是因为下面要搜索"下一页"这个字符串.
-			html_line = utf8_ansi(html_line);
+			std::wstring html_line = utf8_wide(line);
 
 			// 开始状态分析.
 			switch (m_state)
 			{
 			case state_unkown:
 			{
-				if (html_line.find("<td class=\"td-title facered\">") != std::string::npos)
+				if (html_line.find(L"<td class=\"td-title facered\">") != std::string::npos)
 					m_state = state_found;
-				if (html_line.find("下一页") != std::string::npos)
+				if (html_line.find(L"下一页") != std::string::npos)
 				{
 					std::string::size_type pos = 0;
-					if ((pos = html_line.find_first_of("\"")) != std::string::npos)
+					if ((pos = html_line.find_first_of(L"\"")) != std::string::npos)
 					{
 						html_line = html_line.substr(pos + 1);
-						if ((pos = html_line.find_first_of("\"")) != std::string::npos)
+						if ((pos = html_line.find_first_of(L"\"")) != std::string::npos)
 						{
 							html_line = html_line.substr(0, pos);
 							boost::trim(html_line);
-							m_next_page_url = "http://bbs.tianya.cn" + html_line;
+							m_next_page_url = "http://bbs.tianya.cn" + wide_utf8(html_line);
 							start(m_next_page_url);
 							m_next_page_url = "";
 							return;
@@ -230,14 +230,14 @@ protected:
 			case state_target:
 			{
 				std::string::size_type pos = 0;
-				if ((pos = html_line.find_first_of("\"")) != std::string::npos)
+				if ((pos = html_line.find_first_of(L"\"")) != std::string::npos)
 				{
 					html_line = html_line.substr(pos + 1);
-					if ((pos = html_line.find_first_of("\"")) != std::string::npos)
+					if ((pos = html_line.find_first_of(L"\"")) != std::string::npos)
 					{
 						html_line = html_line.substr(0, pos);
 						boost::trim(html_line);
-						m_info.post_url = "http://bbs.tianya.cn" + html_line;
+						m_info.post_url = "http://bbs.tianya.cn" + wide_utf8(html_line);
 						m_state = state_name;
 						break;
 					}
@@ -248,14 +248,14 @@ protected:
 			case state_name:
 			{
 				std::string::size_type pos = 0;
-				if ((pos = html_line.find("<span")) != std::string::npos)
+				if ((pos = html_line.find(L"<span")) != std::string::npos)
 				{
 					html_line = html_line.substr(0, pos);
-					if ((pos = html_line.find_last_of(">")) != std::string::npos)
+					if ((pos = html_line.find_last_of(L">")) != std::string::npos)
 						html_line = html_line.substr(pos + 1);
 				}
 				boost::trim(html_line);
-				m_info.title = html_line;
+				m_info.title = wide_ansi(html_line);
 				m_state = state_skip4;
 			}
 			break;
@@ -272,56 +272,56 @@ protected:
 			case state_author:
 			{
 				std::string::size_type pos = 0;
-				if ((pos = html_line.find("</a>")) != std::string::npos)
+				if ((pos = html_line.find(L"</a>")) != std::string::npos)
 				{
 					html_line = html_line.substr(0, pos);
-					if ((pos = html_line.find_last_of(">")) != std::string::npos)
+					if ((pos = html_line.find_last_of(L">")) != std::string::npos)
 						html_line = html_line.substr(pos + 1);
 				}
 				boost::trim(html_line);
-				m_info.author = html_line;
+				m_info.author = wide_ansi(html_line);
 				m_state = state_hits;
 			}
 			break;
 			case state_hits:
 			{
 				std::string::size_type pos = 0;
-				if ((pos = html_line.find("</td>")) != std::string::npos)
+				if ((pos = html_line.find(L"</td>")) != std::string::npos)
 				{
 					html_line = html_line.substr(0, pos);
-					if ((pos = html_line.find_last_of(">")) != std::string::npos)
+					if ((pos = html_line.find_last_of(L">")) != std::string::npos)
 						html_line = html_line.substr(pos + 1);
 				}
 				boost::trim(html_line);
-				m_info.hits = std::atol(html_line.c_str());
+				m_info.hits = std::atol(wide_ansi(html_line).c_str());
 				m_state = state_replys;
 			}
 			break;
 			case state_replys:
 			{
 				std::string::size_type pos = 0;
-				if ((pos = html_line.find("</td>")) != std::string::npos)
+				if ((pos = html_line.find(L"</td>")) != std::string::npos)
 				{
 					html_line = html_line.substr(0, pos);
-					if ((pos = html_line.find_last_of(">")) != std::string::npos)
+					if ((pos = html_line.find_last_of(L">")) != std::string::npos)
 						html_line = html_line.substr(pos + 1);
 				}
 				boost::trim(html_line);
-				m_info.replys = std::atol(html_line.c_str());
+				m_info.replys = std::atol(wide_ansi(html_line).c_str());
 				m_state = state_time;
 			}
 			break;
 			case state_time:
 			{
 				std::string::size_type pos = 0;
-				if ((pos = html_line.find_last_of("\"")) != std::string::npos)
+				if ((pos = html_line.find_last_of(L"\"")) != std::string::npos)
 				{
 					html_line = html_line.substr(0, pos);
-					if ((pos = html_line.find_last_of("\"")) != std::string::npos)
+					if ((pos = html_line.find_last_of(L"\"")) != std::string::npos)
 						html_line = html_line.substr(pos + 1);
 				}
 				boost::trim(html_line);
-				m_info.post_time = html_line;
+				m_info.post_time = wide_ansi(html_line);
 				m_hits.insert(std::make_pair(m_info.hits, m_info));
 				m_replys.insert(std::make_pair(m_info.replys, m_info));
 				m_state = state_unkown;
