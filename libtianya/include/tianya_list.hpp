@@ -44,9 +44,7 @@ public:
 	// 存文件.
 	void serialize_to_file(std::string name)
 	{
-		std::unique_ptr<FILE, decltype(&std::fclose)> fp{
-			std::fopen(name.c_str(), "w+b"), &std::fclose
-		};
+		std::unique_ptr<FILE, decltype(&std::fclose)> fp(std::fopen(name.c_str(), "w+b"), &std::fclose);
 
 		if (!fp)
 			return;
