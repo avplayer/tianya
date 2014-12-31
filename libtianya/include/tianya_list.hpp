@@ -7,12 +7,15 @@
 
 #pragma once
 
-#include <boost/bind.hpp>
+#include <memory>
+#include <functional>
 
+#include <boost/bind.hpp>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/asio.hpp>
+#include <boost/signals2.hpp>
 
 #include "util.hpp"
 
@@ -37,13 +40,17 @@ public:
 		, m_resolver(io)
 		, m_abort(false)
 	{}
-	~tianya()
+
+	// 存文件.
+	void serialize_to_file(std::string name)
 	{
-		// 存文件.
-		std::string name = time_to_string(aux::gettime()) + ".txt";
-		FILE* fp = std::fopen(name.c_str(), "w+b");
+		std::unique_ptr<FILE, decltype(&std::fclose)> fp{
+			std::fopen(name.c_str(), "w+b"), &std::fclose
+		};
+
 		if (!fp)
 			return;
+
 		for (auto& item : m_hits)
 		{
 			const list_info& data = item.second;
@@ -81,9 +88,8 @@ public:
 			buffer += ansi_wide(data.post_url);
 			buffer += L"\n";
 
-			std::fputs(wide_ansi(buffer, "GBK").c_str(), fp);
+			std::fputs(wide_ansi(buffer, "GBK").c_str(), fp.get());
 		}
-		std::fclose(fp);
 	}
 
 public:
@@ -127,6 +133,12 @@ public:
 		m_abort = true;
 		boost::system::error_code ignore_ec;
 		m_socket.close(ignore_ec);
+	}
+
+	template<class T>
+	void connect_hits_changed(T&& t)
+	{
+		m_sig_hits_changed.connect(t);
 	}
 
 protected:
@@ -325,6 +337,10 @@ protected:
 				m_info.post_time = html_line;
 				m_hits.insert(std::make_pair(m_info.hits, m_info));
 				m_replys.insert(std::make_pair(m_info.replys, m_info));
+				// 发射信号告诉上层 m_hits 改变了
+
+				m_sig_hits_changed();
+
 				m_state = state_unkown;
 			}
 			break;
@@ -358,5 +374,6 @@ private:
 		state_time
 	} m_state;
 	list_info m_info;
+	boost::signals2::signal<void()> m_sig_hits_changed;
 	bool m_abort;
 };

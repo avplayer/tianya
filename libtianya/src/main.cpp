@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <map>
+#include "../include/tianya_list.hpp"
 
 #include "tianya_list.hpp"
 
@@ -29,5 +30,10 @@ int main(int argc, char** argv)
 	terminator_signal.async_wait(boost::bind(&terminator, boost::ref(io), boost::ref(obj)));
 
 	io.run();
+
+	std::string name = time_to_string(aux::gettime()) + ".txt";
+
+	obj.serialize_to_file(name);
+
 	return 0;
 }
