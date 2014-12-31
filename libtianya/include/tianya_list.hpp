@@ -80,7 +80,8 @@ public:
 
 			buffer += ansi_wide(data.post_url);
 			buffer += L"\n";
-			std::fputws(buffer.c_str(), fp);
+
+			std::fputs(wide_ansi(buffer, "GBK").c_str(), fp);
 		}
 		std::fclose(fp);
 	}
