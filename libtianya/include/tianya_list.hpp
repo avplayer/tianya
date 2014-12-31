@@ -1,4 +1,4 @@
-//
+ï»¿//
 // Copyright (C) 2014 Jack.
 //
 // Author: jack
@@ -39,7 +39,7 @@ public:
 	{}
 	~tianya()
 	{
-		// ´æÎÄ¼ş.
+		// å­˜æ–‡ä»¶.
 		std::string name = time_to_string(aux::gettime()) + ".txt";
 		FILE* fp = std::fopen(name.c_str(), "w+b");
 		if (!fp)
@@ -161,14 +161,14 @@ protected:
 			return;
 		}
 
-		// header¶ÁÈ¡.
+		// headerè¯»å–.
 		std::istream response_stream(&m_response);
 		std::string header;
 		while (std::getline(response_stream, header) && header != "\r")
 			std::cout << header << "\n";
 		std::cout << "\n";
 
-		// Ñ­»·¶ÁÈ¡Êı¾İ.
+		// å¾ªç¯è¯»å–æ•°æ®.
 		while (!m_abort)
 		{
 			bytes_transferred = boost::asio::async_read_until(m_socket, m_response, "\n", yield[ec]);
@@ -178,22 +178,22 @@ protected:
 				return;
 			}
 
-			// È¡³öresponseµÄÊı¾İµ½message.
+			// å–å‡ºresponseçš„æ•°æ®åˆ°message.
 			const char* begin = boost::asio::buffer_cast<const char*>(m_response.data());
 			std::string html_line = std::string(begin, begin + bytes_transferred);
 			m_response.consume(bytes_transferred);
 
-			// ×ª³Éansi, Ö÷ÒªÊÇÒòÎªÏÂÃæÒªËÑË÷"ÏÂÒ»Ò³"Õâ¸ö×Ö·û´®.
+			// è½¬æˆansi, ä¸»è¦æ˜¯å› ä¸ºä¸‹é¢è¦æœç´¢"ä¸‹ä¸€é¡µ"è¿™ä¸ªå­—ç¬¦ä¸².
 			html_line = utf8_ansi(html_line);
 
-			// ¿ªÊ¼×´Ì¬·ÖÎö.
+			// å¼€å§‹çŠ¶æ€åˆ†æ.
 			switch (m_state)
 			{
 			case state_unkown:
 			{
 				if (html_line.find("<td class=\"td-title facered\">") != std::string::npos)
 					m_state = state_found;
-				if (html_line.find("ÏÂÒ»Ò³") != std::string::npos)
+				if (html_line.find("ä¸‹ä¸€é¡µ") != std::string::npos)
 				{
 					std::string::size_type pos = 0;
 					if ((pos = html_line.find_first_of("\"")) != std::string::npos)
