@@ -1,4 +1,18 @@
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
 
-add_executable(tianya WIN32 main.cpp)
+cmake_policy(SET CMP0020 NEW)
+add_definitions(-DQT_NO_KEYWORDS)
+
+file(GLOB SRCS *.cpp *.h*)
+file(GLOB UIS *.ui)
+
+qt5_wrap_ui(UI_SRCS ${UIS})
+# qt5_add_resources(RC_SRCS tianya.qrc)
+
+set(SRCS ${SRCS} ${UI_SRCS} ${RC_SRCS})
+
+add_executable(tianya WIN32 ${SRCS})
 
 target_link_libraries(tianya Qt5::Widgets ${Boost_LIBRARIES})
+target_link_libraries(tianya ${CMAKE_THREAD_LIBS_INIT})

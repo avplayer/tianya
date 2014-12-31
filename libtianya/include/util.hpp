@@ -203,7 +203,8 @@ struct url_info
 	std::string fragment;
 };
 
-url_info parser_url(const std::string& url)
+template<typename ChatType>
+url_info parser_url(const std::basic_string<ChatType>& url)
 {
 	url_info ret;
 	boost::regex ex("(http|https)://([^/ :]+):?([^/ ]*)(/?[^ #?]*)\\x3f?([^ #]*)#?([^ ]*)");

@@ -23,9 +23,9 @@ using boost::asio::ip::tcp;
 
 struct list_info
 {
-	std::string title;
+	std::wstring title;
 	std::string post_url;
-	std::string author;
+	std::wstring author;
 	int hits;
 	int replys;
 	std::string post_time;
@@ -59,12 +59,12 @@ public:
 			std::wstring buffer;
 
 			tab = (120 - (data.title.size() - 3)) / 4;
-			buffer = ansi_wide(data.title);
+			buffer = data.title;
 			for (int i = 0; i < tab; i++)
 				buffer += L"\t";
 
 			tab = (32 - (data.author.size() - 3)) / 4;
-			buffer += ansi_wide(data.author);
+			buffer += data.author;
 			for (int i = 0; i < tab; i++)
 				buffer += L"\t";
 
@@ -268,7 +268,7 @@ protected:
 						html_line = html_line.substr(pos + 1);
 				}
 				boost::trim(html_line);
-				m_info.title = html_line;
+				m_info.title = ansi_wide(html_line);
 				m_state = state_skip4;
 			}
 			break;
@@ -292,7 +292,7 @@ protected:
 						html_line = html_line.substr(pos + 1);
 				}
 				boost::trim(html_line);
-				m_info.author = html_line;
+				m_info.author = ansi_wide(html_line);
 				m_state = state_hits;
 			}
 			break;
@@ -339,7 +339,7 @@ protected:
 				m_replys.insert(std::make_pair(m_info.replys, m_info));
 				// 发射信号告诉上层 m_hits 改变了
 
-				m_sig_hits_changed();
+				m_sig_hits_changed(boost::ref(m_hits));
 
 				m_state = state_unkown;
 			}
@@ -374,6 +374,6 @@ private:
 		state_time
 	} m_state;
 	list_info m_info;
-	boost::signals2::signal<void()> m_sig_hits_changed;
+	boost::signals2::signal<void(const ordered_info&)> m_sig_hits_changed;
 	bool m_abort;
 };

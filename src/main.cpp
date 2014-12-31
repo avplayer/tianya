@@ -1,8 +1,10 @@
-
+﻿
 #include <thread>
 #include <QApplication>
 
 #include <tianya_list.hpp>
+
+#include "tianyawindow.hpp"
 
 class AsioQApplication : public QApplication
 {
@@ -38,6 +40,11 @@ private:
 int main(int argc, char* argv[])
 {
 	AsioQApplication app(argc, argv);
+
+	// 创建 主窗口
+	TianyaWindow mainwindow(app.get_io_service());
+
+	mainwindow.show();
 
 	return app.exec();
 }
