@@ -5,6 +5,7 @@
 #include <tianya_list.hpp>
 
 #include "tianyawindow.hpp"
+#include "syncobj.hpp"
 
 class AsioQApplication : public QApplication
 {
@@ -37,8 +38,13 @@ private:
 	std::unique_ptr<boost::asio::io_service::work> m_work;
 };
 
-int main(int argc, char* argv[])
+static SyncObjec * _syncobj;
+
+int main(int argc, char *argv[])
 {
+	// work arround VC
+	SyncObjec syncobj;
+	_syncobj = &syncobj;
 	AsioQApplication app(argc, argv);
 
 	// 创建 主窗口
@@ -48,3 +54,36 @@ int main(int argc, char* argv[])
 
 	return app.exec();
 }
+
+void post_on_gui_thread(std::function<void()> func)
+{
+	_syncobj->do_post(func);
+}
+
+
+#ifdef _WIN32
+
+#ifdef STATIC_QT5
+#include <QtPlugin>
+#include <windows.h>
+
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin);
+
+Q_IMPORT_PLUGIN(QICOPlugin);
+
+#ifdef _DEBUG
+#pragma comment(lib, "Qt5PlatformSupportd.lib")
+#pragma comment(lib, "qwindowsd.lib")
+#pragma comment(lib, "qicod.lib")
+#else
+#pragma comment(lib, "Qt5PlatformSupport.lib")
+#pragma comment(lib, "qwindows.lib")
+#pragma comment(lib, "qico.lib")
+#endif
+
+#pragma comment(lib, "opengl32.lib")
+#pragma comment(lib, "Imm32.lib")
+#pragma comment(lib, "winmm.lib")
+
+#endif
+#endif
