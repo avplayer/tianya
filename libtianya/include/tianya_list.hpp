@@ -18,7 +18,7 @@
 
 using boost::asio::ip::tcp;
 
-struct info
+struct list_info
 {
 	std::string title;
 	std::string post_url;
@@ -46,7 +46,7 @@ public:
 			return;
 		for (auto& item : m_hits)
 		{
-			const info& data = item.second;
+			const list_info& data = item.second;
 			std::size_t tab = 0;
 
 			std::string buffer;
@@ -337,7 +337,7 @@ private:
 	tcp::resolver m_resolver;
 	boost::asio::streambuf m_request;
 	boost::asio::streambuf m_response;
-	typedef std::multimap<int, info> ordered_info;
+	typedef std::multimap<int, list_info> ordered_info;
 	ordered_info m_hits;
 	ordered_info m_replys;
 	std::string m_post_url;
@@ -356,6 +356,6 @@ private:
 		state_replys,
 		state_time
 	} m_state;
-	info m_info;
+	list_info m_info;
 	bool m_abort;
 };
