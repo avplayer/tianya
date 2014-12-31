@@ -1,0 +1,9 @@
+build/
+*.o
+*.obj
+~*
+*.kate-swp
+.*
+.*/
+tianya.kdev4
+!.git*
