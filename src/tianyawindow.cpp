@@ -4,6 +4,7 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	: QMainWindow(parent)
 	, m_io_service(io)
 	, m_tianya(m_io_service)
+	, m_tianya_data_mode(m_tianya)
 {
 	ui.setupUi(this);
 
@@ -28,4 +29,7 @@ void TianyaWindow::show()
 	QMainWindow::show();
 
 	m_tianya.start(m_post_url);
+
+	// 设置 modle !
+	ui.tableView->setModel(&m_tianya_data_mode);
 }
