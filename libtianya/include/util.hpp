@@ -188,3 +188,46 @@ inline std::string time_to_string(int64_t time)
 	ret = buffer;
 	return ret;
 }
+
+struct url_info
+{
+	url_info()
+		: port(-1)
+	{}
+
+	std::string protocol;
+	std::string domain;
+	int port;
+	std::string path;
+	std::string query;
+	std::string fragment;
+};
+
+url_info parser_url(const std::string& url)
+{
+	url_info ret;
+	boost::regex ex("(http|https)://([^/ :]+):?([^/ ]*)(/?[^ #?]*)\\x3f?([^ #]*)#?([^ ]*)");
+	boost::cmatch what;
+	if (boost::regex_match(url.c_str(), what, ex))
+	{
+		ret.protocol = std::string(what[1].first, what[1].second);
+		ret.domain = std::string(what[2].first, what[2].second);
+		std::string port = std::string(what[3].first, what[3].second);
+		if (port.empty())
+		{
+			if (ret.protocol == "http")
+				ret.port = 80;
+			else if (ret.protocol == "https")
+				ret.port = 443;
+		}
+		else
+		{
+			ret.port = std::atol(port.c_str());
+		}
+		ret.path = std::string(what[4].first, what[4].second);
+		ret.query = std::string(what[5].first, what[5].second);
+		ret.fragment = std::string(what[6].first, what[6].second);
+	}
+
+	return ret;
+}
