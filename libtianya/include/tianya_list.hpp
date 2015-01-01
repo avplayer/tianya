@@ -270,7 +270,10 @@ protected:
 				std::string::size_type pos = 0;
 				boost::replace_all(html_line, "<font color=#ff0000>", "");
 				boost::replace_all(html_line, "<font color=red>", "");
+				boost::replace_all(html_line, "<font color=green>", "");
+				boost::replace_all(html_line, "<font color=#BF3EFF>", "");
 				boost::replace_all(html_line, "</font>", "");
+				boost::replace_all(html_line, "</span>", "");
 				boost::replace_all(html_line, "<span class=title_red>", "");
 				if ((pos = html_line.find("<span")) != std::string::npos)
 					html_line = html_line.substr(0, pos);
