@@ -201,6 +201,11 @@ protected:
 			// 转成ansi, 主要是因为下面要搜索"下一页"这个字符串.
 			html_line = utf8_ansi(html_line);
 
+			if (html_line.find("玄幻 悬疑 情感新作《艾斯拉的救赎》 <连载>") != std::string::npos)
+			{
+				int a = 0;
+			}
+
 			// 开始状态分析.
 			switch (m_state)
 			{
@@ -263,12 +268,12 @@ protected:
 			case state_name:
 			{
 				std::string::size_type pos = 0;
+				boost::replace_all(html_line, "<font color=#ff0000>", "");
+				boost::replace_all(html_line, "<font color=red>", "");
+				boost::replace_all(html_line, "</font>", "");
+				boost::replace_all(html_line, "<span class=title_red>", "");
 				if ((pos = html_line.find("<span")) != std::string::npos)
-				{
 					html_line = html_line.substr(0, pos);
-					if ((pos = html_line.find_last_of(">")) != std::string::npos)
-						html_line = html_line.substr(pos + 1);
-				}
 				boost::trim(html_line);
 				m_info.title = ansi_wide(html_line);
 				m_state = state_skip4;
