@@ -46,6 +46,9 @@ int main(int argc, char *argv[])
 	SyncObjec syncobj;
 	_syncobj = &syncobj;
 	AsioQApplication app(argc, argv);
+	app.setOrganizationName("avplayer");
+	app.setOrganizationDomain("avplayer.org");
+	app.setApplicationName("tianyaradar");
 
 	// 创建 主窗口
 	TianyaWindow mainwindow(app.get_io_service());
