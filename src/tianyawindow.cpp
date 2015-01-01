@@ -2,6 +2,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QTimer>
+#include <QCloseEvent>
 
 #include "tianyawindow.hpp"
 #include "syncobj.hpp"
@@ -40,6 +41,13 @@ void TianyaWindow::changeEvent(QEvent *e)
 	default:
 		break;
 	}
+}
+
+void TianyaWindow::closeEvent(QCloseEvent*e)
+{
+    QWidget::closeEvent(e);
+
+	m_tianya.stop();
 }
 
 void TianyaWindow::real_start_tianya()

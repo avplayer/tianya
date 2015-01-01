@@ -17,7 +17,8 @@ public:
 	~TianyaWindow();
 
 protected:
-	void changeEvent(QEvent *e);
+	virtual void changeEvent(QEvent *e) Q_DECL_OVERRIDE;
+    virtual void closeEvent(QCloseEvent*) Q_DECL_OVERRIDE;
 
 private Q_SLOTS:
 	void on_tableView_doubleClicked(const QModelIndex &index);
