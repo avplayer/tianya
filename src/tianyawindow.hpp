@@ -16,18 +16,19 @@ public:
 	explicit TianyaWindow(boost::asio::io_service& , QWidget* parent = 0);
 	~TianyaWindow();
 
-    void show();
-
 protected:
 	void changeEvent(QEvent *e);
 
-
 private Q_SLOTS:
 	void on_tableView_doubleClicked(const QModelIndex &index);
+	void timer_adjust_Column();
+	void real_start_tianya();
 
 private:
 	Ui::TianyaWindow ui;
 	boost::asio::io_service& m_io_service;
+
+	bool m_fist_insertion;
 
 	tianya m_tianya;
 

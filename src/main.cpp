@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 	// 创建 主窗口
 	TianyaWindow mainwindow(app.get_io_service());
 
-	mainwindow.show();
+	mainwindow.showMaximized();
 
 	return app.exec();
 }

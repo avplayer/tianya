@@ -1,6 +1,7 @@
 ﻿
 #include <QDesktopServices>
 #include <QUrl>
+#include <QTimer>
 
 #include "tianyawindow.hpp"
 #include "syncobj.hpp"
@@ -9,6 +10,7 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	: QMainWindow(parent)
 	, m_io_service(io)
 	, m_tianya(m_io_service)
+	, m_fist_insertion(true)
 {
 	ui.setupUi(this);
 
@@ -23,6 +25,8 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui.tableView->setSortingEnabled(true);
 	ui.tableView->sortByColumn(2, Qt::DescendingOrder);
+
+	QTimer::singleShot(20, this, SLOT(real_start_tianya()));
 }
 
 void TianyaWindow::changeEvent(QEvent *e)
@@ -38,14 +42,16 @@ void TianyaWindow::changeEvent(QEvent *e)
 	}
 }
 
-void TianyaWindow::show()
+void TianyaWindow::real_start_tianya()
 {
-	QMainWindow::show();
-
 	m_tianya.connect_hit_item_fetched([this](list_info hits_info)
 	{
 		post_on_gui_thread([this, hits_info]()
 		{
+			if (m_fist_insertion)
+				QTimer::singleShot(300, this, SLOT(timer_adjust_Column()));
+			m_fist_insertion = false;
+
 			m_tianya_data_mode.update_tianya_list(hits_info);
 		});
 	});
@@ -61,4 +67,9 @@ TianyaWindow::~TianyaWindow()
 void TianyaWindow::on_tableView_doubleClicked(const QModelIndex &index)
 {
 	QDesktopServices::openUrl(index.data(Qt::UserRole+1).toUrl());
+}
+
+void TianyaWindow::timer_adjust_Column()
+{
+	ui.tableView->resizeColumnsToContents();
 }
