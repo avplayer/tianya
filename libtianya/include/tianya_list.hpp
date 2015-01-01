@@ -201,11 +201,6 @@ protected:
 			// 转成ansi, 主要是因为下面要搜索"下一页"这个字符串.
 			html_line = utf8_ansi(html_line);
 
-			if (html_line.find("玄幻 悬疑 情感新作《艾斯拉的救赎》 <连载>") != std::string::npos)
-			{
-				int a = 0;
-			}
-
 			// 开始状态分析.
 			switch (m_state)
 			{
