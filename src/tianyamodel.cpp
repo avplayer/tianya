@@ -1,17 +1,15 @@
-﻿#include "tianyamodel.hpp"
-
-#include "syncobj.hpp"
-
+﻿#include "syncobj.hpp"
+#include "tianyamodel.hpp"
 
 TianyaModel::TianyaModel(QObject* parent)
 	: QAbstractTableModel(parent)
 {
 }
 
-
 void TianyaModel::update_tianya_list(const std::multimap< int, list_info >& ordered_info)
 {
 	std::unique_lock<std::mutex> l(m_lock);
+	Q_EMIT beginResetModel();
 
 	m_list_info.clear();
 	m_list_info.reserve(ordered_info.size());
@@ -22,14 +20,7 @@ void TianyaModel::update_tianya_list(const std::multimap< int, list_info >& orde
 		m_list_info.push_back(it->second);
 	}
 
-	post_on_gui_thread([this]()
-	{
-		std::unique_lock<std::mutex> l(m_lock);
-		auto topleft = createIndex(0,0);
-		auto bottomright = createIndex(m_list_info.size()-1, 5);
-		Q_EMIT dataChanged(topleft, bottomright);
-	});
-
+	Q_EMIT endResetModel();
 }
 
 QVariant TianyaModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -87,7 +78,7 @@ QVariant TianyaModel::data(const QModelIndex& index, int role) const
 			case 4:
 				return  QString::fromStdString(info.post_time);
 			case 5:
-				return  QString::fromStdString(info.post_url);
+				return  QString("<a href=\"%1\">%2</a>").arg(QString::fromStdString(info.post_url)).arg(QString::fromStdString(info.post_url));
 			default:
 				return QVariant();
 		}
@@ -98,7 +89,6 @@ QVariant TianyaModel::data(const QModelIndex& index, int role) const
 
 int TianyaModel::columnCount(const QModelIndex& parent) const
 {
-	std::unique_lock<std::mutex> l(m_lock);
 	if(parent.isValid())
 		return 0;
 	return 6;
@@ -109,8 +99,8 @@ int TianyaModel::rowCount(const QModelIndex& parent) const
 	if(parent.isValid())
 		return 0;
 	std::unique_lock<std::mutex> l(m_lock);
-	return 40;
 
 	auto size = m_list_info.size();
+
 	return size;
 }
