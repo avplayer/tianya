@@ -5,6 +5,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSettings>
+#include <QTableView>
 #include <QTimer>
 #include <QUrl>
 #include <QWidgetAction>
@@ -115,7 +116,26 @@ void TianyaWindow::pop_up_context_menu(QPoint pos)
 {
 	auto pop_menu = new QMenu(this);
 
-	pop_menu->addAction("发送到 Kindle");
+	auto action = pop_menu->addAction("发送到 Kindle");
+
+	auto indexes = ui.tableView->selectionModel()->selectedIndexes();
+
+	connect(action, &QAction::triggered, this, [indexes, this](bool)
+	{
+		// 这个用 lambda 是为了捕获上下文
+
+		for (QModelIndex i : indexes)
+		{
+			QVariant post_url_var = i.data(Qt::UserRole+1);
+			if (post_url_var.isValid())
+			{
+				QUrl post_url = post_url_var.toUrl();
+
+				// 构造 tianyadownload 对象, 下载 TXT 然后以邮件附件形式发送到 kindle 里.
+			}
+		}
+
+	});
 
 	pop_menu->popup(ui.tableView->viewport()->mapToGlobal(pos));
 
