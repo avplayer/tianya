@@ -41,59 +41,6 @@ public:
 		, m_abort(false)
 	{}
 
-	// 存文件.
-	void serialize_to_file(std::string name)
-	{
-		std::unique_ptr<FILE, decltype(&std::fclose)> fp(std::fopen(name.c_str(), "w+b"), &std::fclose);
-
-		if (!fp)
-			return;
-
-		for (auto& item : m_hits)
-		{
-			const list_info& data = item.second;
-			const int tabstop = 4;
-			std::size_t tab = 0;
-
-			std::wstring buffer;
-			std::string gbk;
-
-			gbk = wide_ansi(data.title, "GBK");
-			tab = 30 - (gbk.size() / tabstop);
-			buffer = data.title;
-			for (int i = 0; i < tab; i++)
-				buffer += L"\t";
-
-			gbk = wide_ansi(data.author, "GBK");
-			tab = 8 - (gbk.size() / tabstop);
-			buffer += data.author;
-			for (int i = 0; i < tab; i++)
-				buffer += L"\t";
-
-			std::string tmp = std::to_string(data.hits);
-			tab = 8 - (tmp.size() / tabstop);
-			buffer += ansi_wide(tmp);
-			for (int i = 0; i < tab; i++)
-				buffer += L"\t";
-
-			tmp = std::to_string(data.replys);
-			tab = 8 - (tmp.size() / tabstop);
-			buffer += ansi_wide(tmp);
-			for (int i = 0; i < tab; i++)
-				buffer += L"\t";
-
-			buffer += ansi_wide(data.post_time);
-			tab = 8 - (data.post_time.size()/ tabstop);
-			for (int i = 0; i < tab; i++)
-				buffer += L"\t";
-
-			buffer += ansi_wide(data.post_url);
-			buffer += L"\n";
-
-			std::fputs(wide_utf8(buffer).c_str(), fp.get());
-		}
-	}
-
 public:
 	void start(const std::string& post_url)
 	{
@@ -137,10 +84,63 @@ public:
 		m_socket.close(ignore_ec);
 	}
 
-	template<class T>
+	template <class T>
 	void connect_hit_item_fetched(T&& t)
 	{
 		m_sig_hit_item_fetched.connect(t);
+	}
+
+	// 存文件.
+	void serialize_to_file(std::string name)
+	{
+		std::unique_ptr<FILE, decltype(&std::fclose)> fp(std::fopen(name.c_str(), "w+b"), &std::fclose);
+
+		if (!fp)
+			return;
+
+		for (auto& item : m_hits)
+		{
+			const list_info& data = item.second;
+			const int tabstop = 4;
+			std::size_t tab = 0;
+
+			std::wstring buffer;
+			std::string gbk;
+
+			gbk = wide_ansi(data.title, "GBK");
+			tab = 30 - (gbk.size() / tabstop);
+			buffer = data.title;
+			for (int i = 0; i < tab; i++)
+				buffer += L"\t";
+
+			gbk = wide_ansi(data.author, "GBK");
+			tab = 8 - (gbk.size() / tabstop);
+			buffer += data.author;
+			for (int i = 0; i < tab; i++)
+				buffer += L"\t";
+
+			std::string tmp = std::to_string(data.hits);
+			tab = 8 - (tmp.size() / tabstop);
+			buffer += ansi_wide(tmp);
+			for (int i = 0; i < tab; i++)
+				buffer += L"\t";
+
+			tmp = std::to_string(data.replys);
+			tab = 8 - (tmp.size() / tabstop);
+			buffer += ansi_wide(tmp);
+			for (int i = 0; i < tab; i++)
+				buffer += L"\t";
+
+			buffer += ansi_wide(data.post_time);
+			tab = 8 - (data.post_time.size() / tabstop);
+			for (int i = 0; i < tab; i++)
+				buffer += L"\t";
+
+			buffer += ansi_wide(data.post_url);
+			buffer += L"\n";
+
+			std::fputs(wide_utf8(buffer).c_str(), fp.get());
+		}
 	}
 
 protected:
