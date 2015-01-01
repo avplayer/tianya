@@ -39,6 +39,12 @@
      <height>30</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu_Kindle">
+    <property name="title">
+     <string>设置Kindle邮箱</string>
+    </property>
+   </widget>
+   <addaction name="menu_Kindle"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
