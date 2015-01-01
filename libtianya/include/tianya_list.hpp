@@ -52,41 +52,45 @@ public:
 		for (auto& item : m_hits)
 		{
 			const list_info& data = item.second;
+			const int tabstop = 4;
 			std::size_t tab = 0;
 
 			std::wstring buffer;
+			std::string gbk;
 
-			tab = (120 - (data.title.size() - 3)) / 4;
+			gbk = wide_ansi(data.title, "GBK");
+			tab = 30 - (gbk.size() / tabstop);
 			buffer = data.title;
 			for (int i = 0; i < tab; i++)
 				buffer += L"\t";
 
-			tab = (32 - (data.author.size() - 3)) / 4;
+			gbk = wide_ansi(data.author, "GBK");
+			tab = 8 - (gbk.size() / tabstop);
 			buffer += data.author;
 			for (int i = 0; i < tab; i++)
 				buffer += L"\t";
 
 			std::string tmp = std::to_string(data.hits);
-			tab = (32 - (tmp.size() - 3)) / 4;
+			tab = 8 - (tmp.size() / tabstop);
 			buffer += ansi_wide(tmp);
 			for (int i = 0; i < tab; i++)
 				buffer += L"\t";
 
 			tmp = std::to_string(data.replys);
-			tab = (32 - (tmp.size() - 3)) / 4;
+			tab = 8 - (tmp.size() / tabstop);
 			buffer += ansi_wide(tmp);
 			for (int i = 0; i < tab; i++)
 				buffer += L"\t";
 
 			buffer += ansi_wide(data.post_time);
-			tab = (32 - (data.post_time.size() - 3)) / 4;
+			tab = 8 - (data.post_time.size()/ tabstop);
 			for (int i = 0; i < tab; i++)
 				buffer += L"\t";
 
 			buffer += ansi_wide(data.post_url);
 			buffer += L"\n";
 
-			std::fputs(wide_ansi(buffer, "GBK").c_str(), fp.get());
+			std::fputs(wide_utf8(buffer).c_str(), fp.get());
 		}
 	}
 
