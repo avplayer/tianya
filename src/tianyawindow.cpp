@@ -1,8 +1,12 @@
 ﻿
-#include <QDesktopServices>
-#include <QUrl>
-#include <QTimer>
 #include <QCloseEvent>
+#include <QDesktopServices>
+#include <QFrame>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QWidgetAction>
+#include <QTimer>
+#include <QUrl>
 
 #include "tianyawindow.hpp"
 #include "syncobj.hpp"
@@ -18,6 +22,7 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	m_post_url = "http://bbs.tianya.cn/list.jsp?item=culture&grade=1&order=1";
 
 	m_sortproxy_for_tianya_data_mode.setSourceModel(&m_tianya_data_mode);
+	m_sortproxy_for_tianya_data_mode.setFilterKeyColumn(0);
 
 	// 设置 modle !
 	ui.tableView->setModel(&m_sortproxy_for_tianya_data_mode);
@@ -28,6 +33,24 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	ui.tableView->sortByColumn(2, Qt::DescendingOrder);
 
 	QTimer::singleShot(20, this, SLOT(real_start_tianya()));
+
+	// 菜单
+	setMenuWidget(new QWidget(this));
+
+	auto hbox = new QHBoxLayout(menuWidget());
+
+	auto qsetkindke_button = new QPushButton(QStringLiteral("设置Kindle邮箱"), menuWidget());
+	hbox->addWidget(qsetkindke_button);
+
+	hbox->addWidget(new QFrame(menuWidget()));
+
+	auto qlineedit = new QLineEdit(menuWidget());
+	hbox->addWidget(qlineedit);
+
+	qlineedit->setPlaceholderText(QStringLiteral("输入文字过滤标题"));
+
+	connect(qlineedit, SIGNAL(textChanged(QString)), &m_sortproxy_for_tianya_data_mode, SLOT(setFilterFixedString(QString)));
+//	qlineedit->setText();
 }
 
 void TianyaWindow::changeEvent(QEvent *e)
