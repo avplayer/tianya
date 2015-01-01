@@ -4,12 +4,14 @@
 #include <QFrame>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QWidgetAction>
+#include <QSettings>
 #include <QTimer>
 #include <QUrl>
+#include <QWidgetAction>
 
 #include "tianyawindow.hpp"
 #include "syncobj.hpp"
+#include "kindlesettingdialog.hpp"
 
 TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	: QMainWindow(parent)
@@ -122,5 +124,19 @@ void TianyaWindow::pop_up_context_menu(QPoint pos)
 
 void TianyaWindow::kindle_settings(bool)
 {
-	
+	KindleSettingDialog settingsdialog(this);
+
+	QSettings settings;
+
+	settingsdialog.setProperty("kindlemail", settings.value("kindle.kindlemail"));
+	settingsdialog.setProperty("usermail", settings.value("kindle.usermail"));
+	settingsdialog.setProperty("usermail_passwd", settings.value("kindle.usermail_passwd"));
+
+	if (settingsdialog.exec() == QDialog::Accepted)
+	{
+		// 更新设置.
+		settings.setValue("kindle.kindlemail", settingsdialog.property("kindlemail"));
+		settings.setValue("kindle.usermail", settingsdialog.property("usermail"));
+		settings.setValue("kindle.usermail_passwd", settingsdialog.property("usermail_passwd"));
+	}
 }
