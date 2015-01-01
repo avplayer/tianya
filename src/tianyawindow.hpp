@@ -24,6 +24,8 @@ private Q_SLOTS:
 	void on_tableView_doubleClicked(const QModelIndex &index);
 	void timer_adjust_Column();
 	void real_start_tianya();
+	void pop_up_context_menu(QPoint);
+	void kindle_settings(bool);
 
 private:
 	Ui::TianyaWindow ui;

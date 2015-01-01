@@ -31,6 +31,9 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui.tableView->setSortingEnabled(true);
 	ui.tableView->sortByColumn(2, Qt::DescendingOrder);
+	ui.tableView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(ui.tableView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(pop_up_context_menu(QPoint)));
 
 	QTimer::singleShot(20, this, SLOT(real_start_tianya()));
 
@@ -50,7 +53,8 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	qlineedit->setPlaceholderText(QStringLiteral("输入文字过滤标题"));
 
 	connect(qlineedit, SIGNAL(textChanged(QString)), &m_sortproxy_for_tianya_data_mode, SLOT(setFilterFixedString(QString)));
-//	qlineedit->setText();
+
+	connect(qsetkindke_button, SIGNAL(clicked(bool)), this, SLOT(kindle_settings(bool)));
 }
 
 void TianyaWindow::changeEvent(QEvent *e)
@@ -103,4 +107,20 @@ void TianyaWindow::on_tableView_doubleClicked(const QModelIndex &index)
 void TianyaWindow::timer_adjust_Column()
 {
 	ui.tableView->resizeColumnsToContents();
+}
+
+void TianyaWindow::pop_up_context_menu(QPoint pos)
+{
+	auto pop_menu = new QMenu(this);
+
+	pop_menu->addAction("发送到 Kindle");
+
+	pop_menu->popup(ui.tableView->viewport()->mapToGlobal(pos));
+
+	pop_menu->setAttribute(Qt::WA_DeleteOnClose);
+}
+
+void TianyaWindow::kindle_settings(bool)
+{
+	
 }
