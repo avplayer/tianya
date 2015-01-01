@@ -1,6 +1,5 @@
 ﻿#include <iostream>
 #include <map>
-#include "../include/tianya_list.hpp"
 
 #include "tianya_list.hpp"
 
