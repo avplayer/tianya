@@ -1,4 +1,5 @@
-﻿#include "tianyamodel.hpp"
+﻿#include <QUrl>
+#include "tianyamodel.hpp"
 
 TianyaModel::TianyaModel(QObject* parent)
 	: QAbstractTableModel(parent)
@@ -57,30 +58,36 @@ QVariant TianyaModel::data(const QModelIndex& index, int role) const
 	// 向 GUI 提供格式化好的数据
 	auto size = m_list_info.size();
 
-	if (role == Qt::DisplayRole && index.row() < size)
+	if (index.row() < size)
 	{
 		if(index.parent().isValid())
 			return QVariant();
 
 		const list_info& info = m_list_info[index.row()];
 		 //index.row()
-
-		switch(index.column())
+		if (role == Qt::DisplayRole)
 		{
-			case 0:
-				return  QString::fromStdWString(info.title);
-			case 1:
-				return  QString::fromStdWString(info.author);
-			case 2:
-				return  info.hits;
-			case 3:
-				return  info.replys;
-			case 4:
-				return  QString::fromStdString(info.post_time);
-			case 5:
-				return  QString::fromStdString(info.post_url);
-			default:
-				return QVariant();
+			switch(index.column())
+			{
+				case 0:
+					return  QString::fromStdWString(info.title);
+				case 1:
+					return  QString::fromStdWString(info.author);
+				case 2:
+					return  info.hits;
+				case 3:
+					return  info.replys;
+				case 4:
+					return  QString::fromStdString(info.post_time);
+				case 5:
+					return  QString::fromStdString(info.post_url);
+				default:
+					return QVariant();
+			}
+		}
+		else if (role == Qt::UserRole+1)
+		{
+			return QUrl(QString::fromStdString(info.post_url));
 		}
 	}
 

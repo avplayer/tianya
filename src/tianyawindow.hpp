@@ -22,6 +22,9 @@ protected:
 	void changeEvent(QEvent *e);
 
 
+private Q_SLOTS:
+	void on_tableView_doubleClicked(const QModelIndex &index);
+
 private:
 	Ui::TianyaWindow ui;
 	boost::asio::io_service& m_io_service;

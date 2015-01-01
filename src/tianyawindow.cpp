@@ -1,4 +1,8 @@
-﻿#include "tianyawindow.hpp"
+﻿
+#include <QDesktopServices>
+#include <QUrl>
+
+#include "tianyawindow.hpp"
 #include "syncobj.hpp"
 
 TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
@@ -52,4 +56,9 @@ void TianyaWindow::show()
 TianyaWindow::~TianyaWindow()
 {
 	m_tianya.stop();
+}
+
+void TianyaWindow::on_tableView_doubleClicked(const QModelIndex &index)
+{
+	QDesktopServices::openUrl(index.data(Qt::UserRole+1).toUrl());
 }
