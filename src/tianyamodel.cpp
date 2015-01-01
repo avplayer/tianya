@@ -1,26 +1,27 @@
-﻿#include "syncobj.hpp"
-#include "tianyamodel.hpp"
+﻿#include "tianyamodel.hpp"
 
 TianyaModel::TianyaModel(QObject* parent)
 	: QAbstractTableModel(parent)
 {
 }
 
-void TianyaModel::update_tianya_list(const std::multimap< int, list_info >& ordered_info)
+void TianyaModel::update_tianya_list(const list_info& hits_info)
 {
-	std::unique_lock<std::mutex> l(m_lock);
-	Q_EMIT beginResetModel();
+	// 计算待插入位置
+	auto insert_point = std::find_if(std::begin(m_list_info), std::end(m_list_info), [hits_info](const list_info& a){
+		return a.hits < hits_info.hits;
+	});
 
-	m_list_info.clear();
-	m_list_info.reserve(ordered_info.size());
+	auto offset = insert_point -  m_list_info.begin();
 
-	// 内部拷贝一份数据
-	for (auto it = ordered_info.rbegin(); it!= ordered_info.rend(); ++it)
-	{
-		m_list_info.push_back(it->second);
-	}
+	QModelIndex parent;// = createIndex(0,0);
 
-	Q_EMIT endResetModel();
+
+	beginInsertRows(parent, offset, offset);
+
+	m_list_info.insert(insert_point, hits_info);
+
+	endInsertRows();
 }
 
 QVariant TianyaModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -53,7 +54,6 @@ QVariant TianyaModel::headerData(int section, Qt::Orientation orientation, int r
 
 QVariant TianyaModel::data(const QModelIndex& index, int role) const
 {
-	std::unique_lock<std::mutex> l(m_lock);
 	// 向 GUI 提供格式化好的数据
 	auto size = m_list_info.size();
 
@@ -78,7 +78,7 @@ QVariant TianyaModel::data(const QModelIndex& index, int role) const
 			case 4:
 				return  QString::fromStdString(info.post_time);
 			case 5:
-				return  QString("<a href=\"%1\">%2</a>").arg(QString::fromStdString(info.post_url)).arg(QString::fromStdString(info.post_url));
+				return  QString::fromStdString(info.post_url);
 			default:
 				return QVariant();
 		}
@@ -98,7 +98,6 @@ int TianyaModel::rowCount(const QModelIndex& parent) const
 {
 	if(parent.isValid())
 		return 0;
-	std::unique_lock<std::mutex> l(m_lock);
 
 	auto size = m_list_info.size();
 

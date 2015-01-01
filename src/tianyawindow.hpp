@@ -3,6 +3,7 @@
 #include <string>
 #include <boost/asio/io_service.hpp>
 #include <tianya_list.hpp>
+#include <QSortFilterProxyModel>
 #include "tianyamodel.hpp"
 #include "ui_tianyawindow.h"
 
@@ -13,6 +14,7 @@ class TianyaWindow : public QMainWindow
 
 public:
 	explicit TianyaWindow(boost::asio::io_service& , QWidget* parent = 0);
+	~TianyaWindow();
 
     void show();
 
@@ -27,6 +29,7 @@ private:
 	tianya m_tianya;
 
 	TianyaModel m_tianya_data_mode;
+	QSortFilterProxyModel m_sortproxy_for_tianya_data_mode;
 
 	std::string m_post_url;
 };

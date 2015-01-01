@@ -134,9 +134,9 @@ public:
 	}
 
 	template<class T>
-	void connect_hits_changed(T&& t)
+	void connect_hit_item_fetched(T&& t)
 	{
-		m_sig_hits_changed.connect(t);
+		m_sig_hit_item_fetched.connect(t);
 	}
 
 protected:
@@ -337,7 +337,7 @@ protected:
 				m_replys.insert(std::make_pair(m_info.replys, m_info));
 				// 发射信号告诉上层 m_hits 改变了
 
-				m_sig_hits_changed(boost::ref(m_hits));
+				m_sig_hit_item_fetched(boost::ref(m_info));
 
 				m_state = state_unkown;
 			}
@@ -372,6 +372,6 @@ private:
 		state_time
 	} m_state;
 	list_info m_info;
-	boost::signals2::signal<void(const ordered_info&)> m_sig_hits_changed;
+	boost::signals2::signal<void(const list_info&)> m_sig_hit_item_fetched;
 	bool m_abort;
 };
