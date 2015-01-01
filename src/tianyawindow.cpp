@@ -34,7 +34,6 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui.tableView->setSortingEnabled(true);
 	ui.tableView->sortByColumn(2, Qt::DescendingOrder);
-	ui.tableView->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	connect(ui.tableView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(pop_up_context_menu(QPoint)));
 
