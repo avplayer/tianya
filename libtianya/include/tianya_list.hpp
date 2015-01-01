@@ -335,8 +335,8 @@ protected:
 				m_info.post_time = html_line;
 				m_hits.insert(std::make_pair(m_info.hits, m_info));
 				m_replys.insert(std::make_pair(m_info.replys, m_info));
-				// 发射信号告诉上层 m_hits 改变了
 
+				// 发射信号告诉上层 m_hits 改变了.
 				m_sig_hit_item_fetched(boost::ref(m_info));
 
 				m_state = state_unkown;
