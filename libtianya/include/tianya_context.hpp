@@ -291,12 +291,10 @@ private:
 	std::wstring m_context;
 	std::string m_post_url;
 	std::string m_next_page_url;
-
 	// 完全下载完成后发射这个信号.
 	boost::signals2::signal<void()> m_download_complete;
 	// 每获取到一帖发射这个信号.
 	boost::signals2::signal<void(std::wstring)> m_one_content_fetched;
-
 	enum {
 		state_unkown,			//
 		state_div_bbs_content,	// <div class="bbs-content
