@@ -10,7 +10,6 @@
 #include <memory>
 #include <functional>
 
-#include <boost/bind.hpp>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/asio/spawn.hpp>
