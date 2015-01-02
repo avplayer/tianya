@@ -40,6 +40,22 @@ private:
 
 static SyncObjec * _syncobj;
 
+#ifdef _WIN32
+#include "resource.h"
+
+extern QPixmap qt_pixmapFromWinHICON(HICON);
+
+static QIcon load_win32_icon()
+{
+	QIcon ico;
+	HICON hicon = (HICON)::LoadImage(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_TIANYA_ICON),
+		IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_LOADTRANSPARENT);
+	ico = QIcon(qt_pixmapFromWinHICON(hicon));
+	::DestroyIcon(hicon);
+	return ico;
+}
+#endif
+
 int main(int argc, char *argv[])
 {
 	std::locale::global(std::locale(""));
@@ -50,7 +66,11 @@ int main(int argc, char *argv[])
 	app.setOrganizationName("avplayer");
 	app.setOrganizationDomain("avplayer.org");
 	app.setApplicationName("tianyaradar");
+#ifdef _WIN32
+	app.setWindowIcon(load_win32_icon());
+#else
 	app.setWindowIcon(QIcon(":/icon/tianya.svg"));
+#endif
 
 	// 创建 主窗口
 	TianyaWindow mainwindow(app.get_io_service());
