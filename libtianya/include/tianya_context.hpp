@@ -30,15 +30,10 @@ struct context_info
 	std::string last_url;
 	int hits;
 	int replys;
-// 	struct item
-// 	{
-// 		std::wstring context;
-// 		std::wstring time;
-// 	};
 	std::vector<std::wstring> context;
 };
 
-namespace impl{
+namespace impl {
 
 class tianya_context : public std::enable_shared_from_this<tianya_context>
 {
