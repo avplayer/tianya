@@ -350,6 +350,10 @@ public:
 		m_impl->connect_download_complete(t);
 	}
 
+	void serialize_to_file(std::string name)
+	{
+		m_impl->serialize_to_file(name);
+	}
 
 	std::shared_ptr<impl::tianya_context> m_impl;
 };
