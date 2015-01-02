@@ -14,14 +14,21 @@ public:
 
 	virtual ~tianya_download();
 
+public Q_SLOTS:
+	void start();
+
 Q_SIGNALS:
-
-
 	void download_complete();
-	void chunk_download_notify(std::wstring);
+	void chunk_download_notify(QString);
+	void timed_first_timershot();
 
 private:
 	boost::asio::io_service& m_io_service;
 	tianya_context m_tianya_context;
+	list_info m_list_info;
+
+
+	std::shared_ptr<bool> m_should_quit;
+	bool m_first_chunk;
 };
 

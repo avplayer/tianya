@@ -5,6 +5,7 @@
 #include <boost/asio/io_service.hpp>
 #include <tianya_context.hpp>
 #include <tianya_list.hpp>
+#include "tianya_download.hpp"
 
 #include "ui_novelviewer.h"
 
@@ -26,9 +27,11 @@ private:
 	Ui::NovelViewer ui;
 	boost::asio::io_service& m_io_service;
 
-	list_info m_list_info;
+	tianya_download m_tianya_download;
 
-	tianya_context m_tianya_context;
+//	list_info m_list_info;
+
+//	tianya_context m_tianya_context;
 
 	bool m_first_append;
 
