@@ -18,28 +18,6 @@
 
 #include "util.hpp"
 
-namespace detail {
-
-	inline std::string get_chareset(std::string html_line)
-	{
-		boost::cmatch what;
-		// 首先是 text/html; charset=XXX
-		boost::regex ex( "charset=([a-zA-Z0-9\\-_]+)" );
-		boost::regex ex2( "<meta charset=[\"\']?([a-zA-Z0-9\\-_]+)[\"\']?" );
-
-		if (boost::regex_search(html_line.c_str(), what, ex))
-		{
-			return what[1];
-		}
-		else if (boost::regex_search(html_line.c_str(), what, ex2))
-		{
-			return what[1];
-		}
-
-		return "UTF-8";
-	}
-}
-
 using boost::asio::ip::tcp;
 
 struct list_info
