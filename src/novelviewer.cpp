@@ -5,9 +5,7 @@
 NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *parent)
 	: QMainWindow(parent)
 	, m_io_service(io)
-	, m_first_append(true)
 	, m_tianya_download(io, info)
-	, m_quited(std::make_shared<bool>(false))
 {
 	ui.setupUi(this);
 
@@ -17,17 +15,18 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 
 	ui.textBrowser->clear();
 
-	auto quited = m_quited;
-
 	connect(&m_tianya_download, SIGNAL(chunk_download_notify(QString)), ui.textBrowser, SLOT(append(QString)));
  	connect(&m_tianya_download, SIGNAL(timed_first_timershot()), this, SLOT(text_brower_stay_on_top()));
 
+	connect(&m_tianya_download, SIGNAL(download_complete()), this, SLOT(download_complete()));
+
 	m_tianya_download.start();
+
+	statusBar()->showMessage(QStringLiteral("下载中..."));
 }
 
 NovelViewer::~NovelViewer()
 {
-	* m_quited = true;
 }
 
 void NovelViewer::changeEvent(QEvent *e)
@@ -46,5 +45,10 @@ void NovelViewer::changeEvent(QEvent *e)
 void NovelViewer::text_brower_stay_on_top()
 {
 	ui.textBrowser->verticalScrollBar()->setValue(0);
+}
+
+void NovelViewer::download_complete()
+{
+	statusBar()->showMessage(QStringLiteral("下载完成"));
 }
 

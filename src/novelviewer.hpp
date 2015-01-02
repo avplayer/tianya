@@ -22,18 +22,10 @@ protected:
 
 private Q_SLOTS:
 	void text_brower_stay_on_top();
+	void download_complete();
 
 private:
 	Ui::NovelViewer ui;
 	boost::asio::io_service& m_io_service;
-
 	tianya_download m_tianya_download;
-
-//	list_info m_list_info;
-
-//	tianya_context m_tianya_context;
-
-	bool m_first_append;
-
-	std::shared_ptr<bool> m_quited;
 };

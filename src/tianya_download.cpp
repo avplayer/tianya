@@ -13,13 +13,17 @@ tianya_download::tianya_download(boost::asio::io_service& io, const list_info& i
 	, m_should_quit(std::make_shared<bool>(false))
 	, m_first_chunk(true)
 {
-	auto should_quit = m_should_quit;
-	m_tianya_context.connect_one_content_fetched([this, should_quit](std::wstring content)
+	auto object_gone = m_should_quit;
+	m_tianya_context.connect_one_content_fetched([this, object_gone](std::wstring content)
 	{
-		post_on_gui_thread([this, should_quit, content]()
+		if (*object_gone)
+			return;
+
+		post_on_gui_thread([this, object_gone, content]()
 		{
-			if (*should_quit)
+			if (*object_gone)
 				return;
+
 			chunk_download_notify(QString::fromStdWString(content));
 
 			if (m_first_chunk)
@@ -28,6 +32,20 @@ tianya_download::tianya_download(boost::asio::io_service& io, const list_info& i
 
 				QTimer::singleShot(200, this, [this](){timed_first_timershot();});
 			}
+		});
+	});
+
+	m_tianya_context.connect_download_complete([this, object_gone]()
+	{
+		if (*object_gone)
+			return;
+
+		post_on_gui_thread([this, object_gone]()
+		{
+			if (*object_gone)
+				return;
+
+			download_complete();
 		});
 	});
 }

@@ -79,7 +79,8 @@ public:
 						boost::asio::spawn(m_io_service,
 						[this, self, ui](boost::asio::yield_context yield)
 						{
-							process_handle(yield, ui);
+							if (!process_handle(yield, ui))
+								m_download_complete();
 						});
 					}
 				});
@@ -98,6 +99,12 @@ public:
 	void connect_one_content_fetched(T&& t)
 	{
 		m_one_content_fetched.connect(t);
+	}
+
+	template <class T>
+	void connect_download_complete(T&& t)
+	{
+		m_download_complete.connect(t);
 	}
 
 	// 存文件.
@@ -121,7 +128,7 @@ public:
 
 protected:
 
-	void process_handle(boost::asio::yield_context& yield, const url_info& ui)
+	bool process_handle(boost::asio::yield_context& yield, const url_info& ui)
 	{
 		boost::system::error_code ec;
 		m_request.consume(m_request.size());
@@ -142,7 +149,7 @@ protected:
 		if (ec)
 		{
 			m_socket.close(ec);
-			return;
+			return false;
 		}
 
 		std::size_t bytes_transferred = 0;
@@ -151,7 +158,7 @@ protected:
 		if (ec)
 		{
 			m_socket.close(ec);
-			return;
+			return false;
 		}
 
 		// header读取.
@@ -170,7 +177,7 @@ protected:
 			if (ec)
 			{
 				m_socket.close(ec);
-				return;
+				return false;
 			}
 
 			// 取出response的数据到message.
@@ -232,11 +239,9 @@ protected:
 								m_next_page_url = wide_utf8(L"http://bbs.tianya.cn" + html_line);
 								start(m_next_page_url);
 								m_next_page_url = "";
-								return;
+								return true;
 							}
 						}
-
-						m_download_complete();
 					}
 				}
 			}
@@ -281,6 +286,7 @@ protected:
 			break;
 			}
 		}
+		return false;
 	}
 
 private:
@@ -337,5 +343,13 @@ public:
 	{
 		m_impl->connect_one_content_fetched(t);
 	}
+
+	template <class T>
+	void connect_download_complete(T&& t)
+	{
+		m_impl->connect_download_complete(t);
+	}
+
+
 	std::shared_ptr<impl::tianya_context> m_impl;
 };
