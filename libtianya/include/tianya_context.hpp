@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <functional>
+#include <atomic>
 
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
