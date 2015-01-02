@@ -1,12 +1,12 @@
 [Desktop Entry]
 Name=Tianya Radar
-Name[zh]=天涯阅读器
+Name[zh_CN]=天涯阅读器
 
 GenericName=Tianya Radar
-GenericName[zh]=天涯雷达
+GenericName[zh_CN]=天涯雷达
 
 Comment=search novel in tianya
-Comment[zh]=搜索天涯小说
+Comment[zh_CN]=搜索天涯小说
 
 Icon=tianya
 
