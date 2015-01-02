@@ -8,7 +8,7 @@ file(GLOB SRCS *.cpp *.h*)
 file(GLOB UIS *.ui)
 
 qt5_wrap_ui(UI_SRCS ${UIS})
-# qt5_add_resources(RC_SRCS tianya.qrc)
+qt5_add_resources(RC_SRCS tianya.qrc)
 
 set(SRCS ${SRCS} ${UI_SRCS} ${RC_SRCS})
 
