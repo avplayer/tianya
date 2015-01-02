@@ -5,7 +5,7 @@
 #include "tianya_context.hpp"
 #include "tianya_list.hpp"
 
-void terminator(boost::asio::io_service& io, boost::shared_ptr<tianya_context>/*tianya*/&obj)
+void terminator(boost::asio::io_service& io, std::shared_ptr<tianya_context>/*tianya*/&obj)
 {
 	obj->stop();
 }
@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 
 	std::locale::global(std::locale(""));
 
-	/*tianya*/boost::shared_ptr<tianya_context> obj = boost::make_shared<tianya_context>(boost::ref(io));
+	auto obj = std::make_shared<tianya_context>(boost::ref(io));
 	obj->start(post_url);
 
 	boost::asio::signal_set terminator_signal(io);

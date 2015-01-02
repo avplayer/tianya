@@ -34,7 +34,7 @@ struct context_info
 	std::vector<std::wstring> context;
 };
 
-class tianya_context : public boost::enable_shared_from_this<tianya_context>
+class tianya_context : public std::enable_shared_from_this<tianya_context>
 {
 public:
 	tianya_context(boost::asio::io_service& io)
