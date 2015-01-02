@@ -14,12 +14,14 @@ set(SRCS ${SRCS} ${UI_SRCS} ${RC_SRCS})
 
 add_executable(tianya WIN32 ${SRCS})
 
-target_link_libraries(tianya Qt5::Widgets)
-if(MSVC)
 target_include_directories(tianya PUBLIC ${Boost_INCLUDE_DIRS})
-else()
+
+target_link_libraries(tianya Qt5::Widgets)
+
+if(NOT MSVC)
 target_link_libraries(tianya  ${Boost_LIBRARIES})
 endif()
+
 target_link_libraries(tianya ${CMAKE_THREAD_LIBS_INIT})
 
 if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
