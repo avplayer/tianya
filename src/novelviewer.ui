@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>NovelViewer</class>
  <widget class="QMainWindow" name="NovelViewer">
@@ -33,12 +33,6 @@
      <height>30</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_Kindle">
-    <property name="title">
-     <string>下载到Kindle</string>
-    </property>
-   </widget>
-   <addaction name="menu_Kindle"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

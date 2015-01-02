@@ -38,6 +38,9 @@ tianya_download::tianya_download(boost::asio::io_service& io, const list_info& i
 
 tianya_download::~tianya_download()
 {
+	m_connection_notify_complete.disconnect();
+	m_connection_notify_chunk.disconnect();
+
 	m_tianya_context->stop();
 }
 
