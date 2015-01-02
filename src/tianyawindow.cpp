@@ -1,14 +1,11 @@
 ﻿
+#include <QtWidgets>
+#include <QFileDialog>
 #include <QCloseEvent>
 #include <QDesktopServices>
-#include <QFrame>
-#include <QLineEdit>
-#include <QPushButton>
 #include <QSettings>
-#include <QTableView>
 #include <QTimer>
 #include <QUrl>
-#include <QWidgetAction>
 
 #include "tianyawindow.hpp"
 #include "syncobj.hpp"
@@ -30,7 +27,7 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	// 设置 modle !
 	ui.tableView->setModel(&m_sortproxy_for_tianya_data_mode);
 	ui.tableView->setAlternatingRowColors(true);
-	ui.tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+//	ui.tableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui.tableView->setSortingEnabled(true);
 	ui.tableView->sortByColumn(2, Qt::DescendingOrder);
@@ -90,6 +87,11 @@ void TianyaWindow::real_start_tianya()
 			m_fist_insertion = false;
 
 			m_tianya_data_mode.update_tianya_list(hits_info);
+
+			// 更新状态栏
+			statusBar()->showMessage(QString("已更新到 %1 条").arg(m_tianya_data_mode.rowCount()));
+
+
 		});
 	});
 
@@ -115,9 +117,32 @@ void TianyaWindow::pop_up_context_menu(QPoint pos)
 {
 	auto pop_menu = new QMenu(this);
 
-	auto action = pop_menu->addAction("发送到 Kindle");
+	auto action = pop_menu->addAction(QStringLiteral("发送到 Kindle"));
 
-	auto indexes = ui.tableView->selectionModel()->selectedIndexes();
+	auto indexes = ui.tableView->selectionModel()->selectedRows();
+
+	if (indexes.size() >1 )
+	{
+		auto action = pop_menu->addAction(QStringLiteral("导出为..."));
+
+		connect(action, &QAction::triggered, this, [indexes, this](bool)
+		{
+			// 将列表保存为 csv 格式的文件
+			QFileDialog filedlg(this);
+
+			filedlg.setAcceptMode(QFileDialog::AcceptSave);
+			filedlg.setDefaultSuffix("csv");
+			filedlg.setNameFilter("电子表格 (*.csv)");
+
+			if (filedlg.exec() == QFileDialog::Accepted && filedlg.selectedFiles().size())
+			{
+				QString savefilename = filedlg.selectedFiles().first();
+
+				std::cout << "save to " << savefilename.toStdString() << std::endl;
+
+			}
+		});
+	}
 
 	connect(action, &QAction::triggered, this, [indexes, this](bool)
 	{
@@ -125,12 +150,14 @@ void TianyaWindow::pop_up_context_menu(QPoint pos)
 
 		for (QModelIndex i : indexes)
 		{
-			QVariant post_url_var = i.data(Qt::UserRole+1);
+			QVariant post_url_var = i.data(Qt::UserRole+2);
 			if (post_url_var.isValid())
 			{
-				QUrl post_url = post_url_var.toUrl();
+				list_info info = qvariant_cast<list_info>(post_url_var);
 
 				// 构造 tianyadownload 对象, 下载 TXT 然后以邮件附件形式发送到 kindle 里.
+
+				std::cout << wide_utf8(info.title) << info.post_url << std::endl;
 			}
 		}
 

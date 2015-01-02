@@ -4,6 +4,7 @@
 TianyaModel::TianyaModel(QObject* parent)
 	: QAbstractTableModel(parent)
 {
+	qRegisterMetaType<list_info>("list_info");
 }
 
 void TianyaModel::update_tianya_list(const list_info& hits_info)
@@ -28,13 +29,8 @@ void TianyaModel::update_tianya_list(const list_info& hits_info)
 
 	auto offset = insert_point -  m_list_info.begin();
 
-	QModelIndex parent;// = createIndex(0,0);
-
-
-	beginInsertRows(parent, offset, offset);
-
+	beginInsertRows(QModelIndex(), offset, offset);
 	m_list_info.insert(insert_point, hits_info);
-
 	endInsertRows();
 }
 
@@ -101,6 +97,12 @@ QVariant TianyaModel::data(const QModelIndex& index, int role) const
 		else if (role == Qt::UserRole+1)
 		{
 			return QUrl(QString::fromStdString(info.post_url));
+		}
+		else if (role == Qt::UserRole+2)
+		{
+			QVariant v;
+			v.setValue(info);
+			return v;
 		}
 	}
 
