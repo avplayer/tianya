@@ -33,9 +33,7 @@ struct context_info
 	std::vector<std::wstring> context;
 };
 
-namespace impl {
-
-class tianya_context : public std::enable_shared_from_this<tianya_context>
+class tianya_context : public boost::noncopyable
 {
 public:
 	tianya_context(boost::asio::io_service& io)
@@ -48,7 +46,6 @@ public:
 public:
 	void start(const std::string& post_url)
 	{
-		auto self = shared_from_this();
 		m_post_url = post_url;
 		m_state = state_unkown;
 		url_info ui = parser_url(m_post_url);
@@ -57,7 +54,7 @@ public:
 		port_string << ui.port;
 		tcp::resolver::query query(ui.domain, port_string.str());
 		m_resolver.async_resolve(query,
-		[this, self, ui](const boost::system::error_code& error, tcp::resolver::iterator endpoint_iterator)
+		[this, ui](const boost::system::error_code& error, tcp::resolver::iterator endpoint_iterator)
 		{
 			if (!error)
 			{
@@ -67,12 +64,12 @@ public:
 					m_socket.close(ignore_ec);
 				}
 				boost::asio::async_connect(m_socket, endpoint_iterator,
-				[this, self, ui](const boost::system::error_code& error, tcp::resolver::iterator endpoint_iterator)
+				[this, ui](const boost::system::error_code& error, tcp::resolver::iterator endpoint_iterator)
 				{
 					if (!error)
 					{
 						boost::asio::spawn(m_io_service,
-						[this, self, ui](boost::asio::yield_context yield)
+						[this, ui](boost::asio::yield_context yield)
 						{
 							if (!process_handle(yield, ui))
 								m_download_complete();
@@ -305,46 +302,5 @@ private:
 		state_div_bbs_content,	// <div class="bbs-content
 		state_author			// <a href="javascript:void(0);" class="reportme a-link" replyid="0" replytime="2010-05-16 22:22:13" author="害我心跳180" authorId="20558716">举报</a> |
 	} m_state;
-	std::atomic<bool> m_abort;
-};
-
-} // namespace impl
-
-class tianya_context : boost::noncopyable
-{
-public:
-	tianya_context(boost::asio::io_service& io)
-	{
-		m_impl = std::make_shared<impl::tianya_context>(std::ref(io));
-	}
-
-	~tianya_context()
-	{
-		m_impl->stop();
-	}
-
-	void start(std::string url)
-	{
-		m_impl->start(url);
-	}
-
-	void stop()
-	{
-		m_impl->stop();
-	}
-
-	template <class T>
-	void connect_one_content_fetched(T&& t)
-	{
-		m_impl->connect_one_content_fetched(t);
-	}
-
-	template <class T>
-	void connect_download_complete(T&& t)
-	{
-		m_impl->connect_download_complete(t);
-	}
-
-
-	std::shared_ptr<impl::tianya_context> m_impl;
+	bool m_abort;
 };
