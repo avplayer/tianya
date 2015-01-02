@@ -16,7 +16,7 @@ add_executable(tianya WIN32 ${SRCS})
 
 target_link_libraries(tianya Qt5::Widgets)
 if(MSVC)
-target_include_directories(tianya ${Boost_INCLUDE_DIRS})
+target_include_directories(tianya PUBLIC ${Boost_INCLUDE_DIRS})
 else()
 target_link_libraries(tianya  ${Boost_LIBRARIES})
 endif()
