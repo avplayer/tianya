@@ -24,7 +24,7 @@ Q_SIGNALS:
 
 private:
 	boost::asio::io_service& m_io_service;
-	tianya_context m_tianya_context;
+	std::shared_ptr<tianya_context> m_tianya_context;
 	list_info m_list_info;
 
 
