@@ -21,6 +21,7 @@ int main(int argc, char** argv)
 
 	auto obj = std::make_shared<tianya_context>(boost::ref(io));
 	obj->start(post_url);
+	obj->filter_reply(true);
 
 	boost::asio::signal_set terminator_signal(io);
 	terminator_signal.add(SIGINT);

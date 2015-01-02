@@ -295,23 +295,29 @@ protected:
 								bool filter = false;
 								if (m_filter_reply)
 								{
-									std::for_each(m_users.begin(), m_users.end(),
-										[this, &filter](const std::wstring& s)
+									if (m_context.size() < 500 ||
+										m_context.find(L"——————————————————————") != std::wstring::npos)
 									{
-										std::wstring test = L"@" + s;
-										if (m_context.find(test) != std::wstring::npos)
-											filter = true;
-										test = L"作者：" + s;
-										if (m_context.find(test) != std::wstring::npos)
-											filter = true;
-										test = s + L"：";
-										if (m_context.find(test) != std::wstring::npos)
-											filter = true;
-									});
+										filter = true;
+									}
+									else
+									{
+										std::for_each(m_users.begin(), m_users.end(),
+										[this, &filter](const std::wstring& s)
+										{
+											std::wstring test = L"@" + s;
+											if (m_context.find(test) != std::wstring::npos)
+												filter = true;
+											test = L"作者：" + s;
+											if (m_context.find(test) != std::wstring::npos)
+												filter = true;
+											test = s + L"：";
+											if (m_context.find(test) != std::wstring::npos)
+												filter = true;
+										});
+									}
 								}
-								if (!filter &&
-									m_context.size() > 500 &&
-									m_context.find(L"——————————————————————") == std::wstring::npos)
+								if (!filter)
 									m_context_info.context.push_back(m_context);
 								m_one_content_fetched(m_context);
 							}
