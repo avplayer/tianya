@@ -87,7 +87,7 @@ QVariant TianyaModel::data(const QModelIndex& index, int role) const
 				case 3:
 					return  info.replys;
 				case 4:
-					return  QString::fromStdString(info.post_time);
+					return  QString::fromStdWString(info.post_time);
 				case 5:
 					return  QString::fromStdString(info.post_url);
 				default:

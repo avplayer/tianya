@@ -18,6 +18,29 @@
 
 #include "util.hpp"
 
+namespace detail
+{
+
+	inline std::string get_chareset(std::string html_line)
+	{
+		boost::cmatch what;
+		// 首先是 text/html; charset=XXX
+		boost::regex ex( "charset=([a-zA-Z0-9\\-_]+)" );
+		boost::regex ex2( "<meta charset=[\"\']?([a-zA-Z0-9\\-_]+)[\"\']?" );
+
+		if( boost::regex_search( html_line.c_str(), what, ex ) )
+		{
+			return what[1];
+		}
+		else if( boost::regex_search( html_line.c_str(), what, ex2 ) )
+		{
+			return what[1];
+		}
+
+		return "UTF-8";
+	}
+}
+
 using boost::asio::ip::tcp;
 
 struct list_info
@@ -27,7 +50,7 @@ struct list_info
 	std::wstring author;
 	int hits;
 	int replys;
-	std::string post_time;
+	std::wstring post_time;
 };
 
 class tianya : public boost::noncopyable
@@ -130,7 +153,7 @@ public:
 			for (int i = 0; i < tab; i++)
 				buffer += L"\t";
 
-			buffer += ansi_wide(data.post_time);
+			buffer += data.post_time;
 			tab = 8 - (data.post_time.size() / tabstop);
 			for (int i = 0; i < tab; i++)
 				buffer += L"\t";
@@ -160,16 +183,16 @@ protected:
 		request_stream << "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36\r\n";
 		request_stream << "Accept: */*\r\n";
 		request_stream << "Connection: close\r\n\r\n";
-		boost::asio::async_write(m_socket, m_request, yield[ec]);
-		if (ec)
-		{
-			m_socket.close(ec);
-			return;
-		}
-		m_response.consume(m_response.size());
+
 		std::size_t bytes_transferred = 0;
-		bytes_transferred = boost::asio::async_read_until(m_socket, m_response, "\r\n\r\n", yield[ec]);
-		if (ec)
+
+		try
+		{
+			boost::asio::async_write(m_socket, m_request, yield);
+			m_response.consume(m_response.size());
+			bytes_transferred = boost::asio::async_read_until(m_socket, m_response, "\r\n\r\n", yield);
+
+		}catch(const std::runtime_error& _ec)
 		{
 			m_socket.close(ec);
 			return;
@@ -181,6 +204,8 @@ protected:
 		while (std::getline(response_stream, header) && header != "\r")
 			std::cout << header << "\n";
 		std::cout << "\n";
+
+		std::string html_page_chareset = "utf-8";
 
 		// 循环读取数据.
 		while (!m_abort)
@@ -194,30 +219,38 @@ protected:
 
 			// 取出response的数据到message.
 			const char* begin = boost::asio::buffer_cast<const char*>(m_response.data());
-			std::string html_line = std::string(begin, begin + bytes_transferred);
+			std::string raw_html_line = std::string(begin, begin + bytes_transferred);
 			m_response.consume(bytes_transferred);
 
-			// 转成ansi, 主要是因为下面要搜索"下一页"这个字符串.
-			html_line = utf8_ansi(html_line);
+			// 查找页面编码, 然后转成 std::wstring
+			std::wstring html_line;
+
+			html_line = ansi_wide(raw_html_line, html_page_chareset);
+
 
 			// 开始状态分析.
 			switch (m_state)
 			{
 			case state_unkown:
 			{
-				if (html_line.find("<td class=\"td-title facered\">") != std::string::npos)
+				if (html_line.find(L"meta charset=") != std::wstring::npos)
+				{
+					// 获取真正的 编码
+					html_page_chareset = detail::get_chareset(raw_html_line);
+				}
+				if (html_line.find(L"<td class=\"td-title facered\">") != std::string::npos)
 					m_state = state_found;
-				if (html_line.find("下一页") != std::string::npos)
+				if (html_line.find(L"下一页") != std::string::npos)
 				{
 					std::string::size_type pos = 0;
-					if ((pos = html_line.find_first_of("\"")) != std::string::npos)
+					if ((pos = html_line.find_first_of(L"\"")) != std::string::npos)
 					{
 						html_line = html_line.substr(pos + 1);
-						if ((pos = html_line.find_first_of("\"")) != std::string::npos)
+						if ((pos = html_line.find_first_of(L"\"")) != std::string::npos)
 						{
 							html_line = html_line.substr(0, pos);
 							boost::trim(html_line);
-							m_next_page_url = "http://bbs.tianya.cn" + html_line;
+							m_next_page_url = wide_utf8(L"http://bbs.tianya.cn" + html_line);
 							start(m_next_page_url);
 							m_next_page_url = "";
 							return;
@@ -244,14 +277,14 @@ protected:
 			case state_target:
 			{
 				std::string::size_type pos = 0;
-				if ((pos = html_line.find_first_of("\"")) != std::string::npos)
+				if ((pos = html_line.find_first_of(L"\"")) != std::string::npos)
 				{
 					html_line = html_line.substr(pos + 1);
-					if ((pos = html_line.find_first_of("\"")) != std::string::npos)
+					if ((pos = html_line.find_first_of(L"\"")) != std::string::npos)
 					{
 						html_line = html_line.substr(0, pos);
 						boost::trim(html_line);
-						m_info.post_url = "http://bbs.tianya.cn" + html_line;
+						m_info.post_url = wide_utf8(L"http://bbs.tianya.cn" + html_line);
 						m_state = state_name;
 						break;
 					}
@@ -262,17 +295,17 @@ protected:
 			case state_name:
 			{
 				std::string::size_type pos = 0;
-				boost::replace_all(html_line, "<font color=#ff0000>", "");
-				boost::replace_all(html_line, "<font color=red>", "");
-				boost::replace_all(html_line, "<font color=green>", "");
-				boost::replace_all(html_line, "<font color=#BF3EFF>", "");
-				boost::replace_all(html_line, "</font>", "");
-				boost::replace_all(html_line, "</span>", "");
-				boost::replace_all(html_line, "<span class=title_red>", "");
-				if ((pos = html_line.find("<span")) != std::string::npos)
+				boost::replace_all(html_line, L"<font color=#ff0000>", L"");
+				boost::replace_all(html_line, L"<font color=red>", L"");
+				boost::replace_all(html_line, L"<font color=green>", L"");
+				boost::replace_all(html_line, L"<font color=#BF3EFF>", L"");
+				boost::replace_all(html_line, L"</font>", L"");
+				boost::replace_all(html_line, L"</span>", L"");
+				boost::replace_all(html_line, L"<span class=title_red>", L"");
+				if ((pos = html_line.find(L"<span")) != std::wstring::npos)
 					html_line = html_line.substr(0, pos);
 				boost::trim(html_line);
-				m_info.title = ansi_wide(html_line);
+				m_info.title = html_line;
 				m_state = state_skip4;
 			}
 			break;
@@ -289,52 +322,52 @@ protected:
 			case state_author:
 			{
 				std::string::size_type pos = 0;
-				if ((pos = html_line.find("</a>")) != std::string::npos)
+				if ((pos = html_line.find(L"</a>")) != std::string::npos)
 				{
 					html_line = html_line.substr(0, pos);
-					if ((pos = html_line.find_last_of(">")) != std::string::npos)
+					if ((pos = html_line.find_last_of(L">")) != std::string::npos)
 						html_line = html_line.substr(pos + 1);
 				}
 				boost::trim(html_line);
-				m_info.author = ansi_wide(html_line);
+				m_info.author = html_line;
 				m_state = state_hits;
 			}
 			break;
 			case state_hits:
 			{
 				std::string::size_type pos = 0;
-				if ((pos = html_line.find("</td>")) != std::string::npos)
+				if ((pos = html_line.find(L"</td>")) != std::string::npos)
 				{
 					html_line = html_line.substr(0, pos);
-					if ((pos = html_line.find_last_of(">")) != std::string::npos)
+					if ((pos = html_line.find_last_of(L">")) != std::string::npos)
 						html_line = html_line.substr(pos + 1);
 				}
 				boost::trim(html_line);
-				m_info.hits = std::atol(html_line.c_str());
+				m_info.hits = std::atol(wide_utf8(html_line).c_str());
 				m_state = state_replys;
 			}
 			break;
 			case state_replys:
 			{
 				std::string::size_type pos = 0;
-				if ((pos = html_line.find("</td>")) != std::string::npos)
+				if ((pos = html_line.find(L"</td>")) != std::string::npos)
 				{
 					html_line = html_line.substr(0, pos);
-					if ((pos = html_line.find_last_of(">")) != std::string::npos)
+					if ((pos = html_line.find_last_of(L">")) != std::string::npos)
 						html_line = html_line.substr(pos + 1);
 				}
 				boost::trim(html_line);
-				m_info.replys = std::atol(html_line.c_str());
+				m_info.replys = std::atol(wide_utf8(html_line).c_str());
 				m_state = state_time;
 			}
 			break;
 			case state_time:
 			{
 				std::string::size_type pos = 0;
-				if ((pos = html_line.find_last_of("\"")) != std::string::npos)
+				if ((pos = html_line.find_last_of(L"\"")) != std::string::npos)
 				{
 					html_line = html_line.substr(0, pos);
-					if ((pos = html_line.find_last_of("\"")) != std::string::npos)
+					if ((pos = html_line.find_last_of(L"\"")) != std::string::npos)
 						html_line = html_line.substr(pos + 1);
 				}
 				boost::trim(html_line);
