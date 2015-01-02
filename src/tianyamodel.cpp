@@ -13,6 +13,19 @@ void TianyaModel::update_tianya_list(const list_info& hits_info)
 		return a.hits < hits_info.hits;
 	});
 
+	// 避免重复
+	if (insert_point != std::end(m_list_info))
+	{
+		if(std::end(m_list_info) != std::find_if(std::begin(m_list_info), std::end(m_list_info),
+			[hits_info](const list_info& a){return a.post_url == hits_info.post_url;})
+		){
+			return;
+		}
+	}else if (m_list_info.size() && m_list_info.rbegin()->post_url == hits_info.post_url)
+	{
+		return;
+	}
+
 	auto offset = insert_point -  m_list_info.begin();
 
 	QModelIndex parent;// = createIndex(0,0);
