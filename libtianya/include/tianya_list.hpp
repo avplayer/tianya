@@ -30,10 +30,10 @@ struct list_info
 	std::wstring post_time;
 };
 
-class tianya : public boost::noncopyable
+class tianya_list : public boost::noncopyable
 {
 public:
-	tianya(boost::asio::io_service& io)
+	tianya_list(boost::asio::io_service& io)
 		: m_io_service(io)
 		, m_socket(io)
 		, m_resolver(io)
