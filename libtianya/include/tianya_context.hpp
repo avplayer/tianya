@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <memory>
 #include <functional>
 #include <atomic>
@@ -41,6 +42,7 @@ public:
 		: m_io_service(io)
 		, m_socket(io)
 		, m_resolver(io)
+		, m_filter_reply(false)
 		, m_abort(false)
 	{}
 
@@ -87,6 +89,16 @@ public:
 		m_abort = true;
 		boost::system::error_code ignore_ec;
 		m_socket.close(ignore_ec);
+	}
+
+	void filter_reply(bool filter)
+	{
+		m_filter_reply = filter;
+	}
+
+	bool filter_reply() const
+	{
+		return m_filter_reply;
 	}
 
 	template <class T>
@@ -208,7 +220,7 @@ protected:
 					}
 				}
 
-				if (html_line.find(L"<div class=\"bbs-content") != std::string::npos)
+				if (html_line.find(L"<div class=\"bbs-content") != std::wstring::npos)
 				{
 					m_context.clear();
 					m_state = state_div_bbs_content;
@@ -242,7 +254,7 @@ protected:
 			break;
 			case state_div_bbs_content:
 			{
-				if (html_line.find(L"</div>") != std::string::npos)
+				if (html_line.find(L"</div>") != std::wstring::npos)
 				{
 					m_state = state_author;
 					break;
@@ -260,6 +272,10 @@ protected:
 					{
 						std::wstring author = what[1];
 						boost::trim(author);
+						if (m_filter_reply)
+						{
+							m_users.insert(author);
+						}
 						if (author == m_context_info.author)
 						{
 							ex.assign(L"replytime=\"(.*?)\"");
@@ -268,7 +284,27 @@ protected:
 								std::wstring reply_time = what[1];
 								boost::trim(m_context);
 								boost::replace_all(m_context, L"<br>", L"\n");
-								m_context_info.context.push_back(m_context);
+								bool filter = false;
+								if (m_filter_reply)
+								{
+									std::for_each(m_users.begin(), m_users.end(),
+										[this, &filter](const std::wstring& s)
+									{
+										std::wstring test = L"@" + s;
+										if (m_context.find(test) != std::wstring::npos)
+											filter = true;
+										test = L"作者：" + s;
+										if (m_context.find(test) != std::wstring::npos)
+											filter = true;
+										test = s + L"：";
+										if (m_context.find(test) != std::wstring::npos)
+											filter = true;
+									});
+								}
+								if (!filter &&
+									m_context.size() > 500 &&
+									m_context.find(L"——————————————————————") == std::wstring::npos)
+									m_context_info.context.push_back(m_context);
 								m_one_content_fetched(m_context);
 							}
 						}
@@ -293,6 +329,8 @@ private:
 	std::wstring m_context;
 	std::string m_post_url;
 	std::string m_next_page_url;
+	bool m_filter_reply;
+	std::set<std::wstring> m_users;
 	// 完全下载完成后发射这个信号.
 	boost::signals2::signal<void()> m_download_complete;
 	// 每获取到一帖发射这个信号.
