@@ -24,11 +24,13 @@ Q_SIGNALS:
 
 private:
 	boost::asio::io_service& m_io_service;
-	tianya_context m_tianya_context;
 	list_info m_list_info;
 
+	boost::signals2::scoped_connection m_connection_notify_chunk;
+	boost::signals2::scoped_connection m_connection_notify_complete;
 
-	std::shared_ptr<bool> m_should_quit;
+	std::shared_ptr<tianya_context> m_tianya_context;
+
 	bool m_first_chunk;
 };
 

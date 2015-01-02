@@ -8,22 +8,14 @@
 tianya_download::tianya_download(boost::asio::io_service& io, const list_info& info, QObject* parent)
 	: QObject(parent)
 	, m_io_service(io)
-	, m_tianya_context(io)
+	, m_tianya_context(std::make_shared<tianya_context>(std::ref(io)))
 	, m_list_info(info)
-	, m_should_quit(std::make_shared<bool>(false))
 	, m_first_chunk(true)
 {
-	auto object_gone = m_should_quit;
-	m_tianya_context.connect_one_content_fetched([this, object_gone](std::wstring content)
+	m_connection_notify_chunk = m_tianya_context->connect_one_content_fetched([this](std::wstring content)
 	{
-		if (*object_gone)
-			return;
-
-		post_on_gui_thread([this, object_gone, content]()
+		post_on_gui_thread([this, content]()
 		{
-			if (*object_gone)
-				return;
-
 			chunk_download_notify(QString::fromStdWString(content));
 
 			if (m_first_chunk)
@@ -35,16 +27,10 @@ tianya_download::tianya_download(boost::asio::io_service& io, const list_info& i
 		});
 	});
 
-	m_tianya_context.connect_download_complete([this, object_gone]()
+	m_connection_notify_complete = m_tianya_context->connect_download_complete([this]()
 	{
-		if (*object_gone)
-			return;
-
-		post_on_gui_thread([this, object_gone]()
+		post_on_gui_thread([this]()
 		{
-			if (*object_gone)
-				return;
-
 			download_complete();
 		});
 	});
@@ -52,11 +38,10 @@ tianya_download::tianya_download(boost::asio::io_service& io, const list_info& i
 
 tianya_download::~tianya_download()
 {
-	*m_should_quit = true;
-	m_tianya_context.stop();
+	m_tianya_context->stop();
 }
 
 void tianya_download::start()
 {
-	m_tianya_context.start(m_list_info.post_url);
+	m_tianya_context->start(m_list_info.post_url);
 }
