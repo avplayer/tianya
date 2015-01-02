@@ -33,3 +33,5 @@ if(MSVC)
 endif()
 
 install(TARGETS tianya RUNTIME DESTINATION bin)
+
+install(PROGRAMS tianya-radar.desktop DESTINATION share/applications)
