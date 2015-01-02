@@ -10,6 +10,7 @@
 #include "tianyawindow.hpp"
 #include "syncobj.hpp"
 #include "kindlesettingdialog.hpp"
+#include "novelviewer.hpp"
 
 TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	: QMainWindow(parent)
@@ -120,6 +121,8 @@ void TianyaWindow::pop_up_context_menu(QPoint pos)
 
 	auto action = pop_menu->addAction(QStringLiteral("发送到 Kindle"));
 
+	auto action_view = pop_menu->addAction(QStringLiteral("查看文章"));
+
 	auto indexes = ui.tableView->selectionModel()->selectedRows();
 
 	if (indexes.size() >1 )
@@ -147,6 +150,26 @@ void TianyaWindow::pop_up_context_menu(QPoint pos)
 		});
 	}
 
+	connect(action_view, &QAction::triggered, this, [indexes, this](bool)
+	{
+		// 这里下载小说然后打开窗口查看
+		for (QModelIndex i : indexes)
+		{
+			QVariant post_url_var = i.data(Qt::UserRole+2);
+			if (post_url_var.isValid())
+			{
+				list_info info = qvariant_cast<list_info>(post_url_var);
+
+				auto viewer = new NovelViewer(m_io_service, info);
+				viewer->setAttribute(Qt::WA_DeleteOnClose);
+				viewer->show();
+
+			}
+		}
+
+
+	});
+
 	connect(action, &QAction::triggered, this, [indexes, this](bool)
 	{
 		// 这个用 lambda 是为了捕获上下文
@@ -158,13 +181,13 @@ void TianyaWindow::pop_up_context_menu(QPoint pos)
 			{
 				list_info info = qvariant_cast<list_info>(post_url_var);
 
-				// 构造 tianyadownload 对象, 下载 TXT 然后以邮件附件形式发送到 kindle 里.
-
-				std::cout << wide_utf8(info.title) << info.post_url << std::endl;
+				// TODO 构造 tianyadownload 对象, 下载 TXT 然后以邮件附件形式发送到 kindle 里.
 			}
 		}
 
 	});
+
+
 
 	pop_menu->popup(ui.tableView->viewport()->mapToGlobal(pos));
 

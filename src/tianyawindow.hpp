@@ -2,8 +2,10 @@
 
 #include <string>
 #include <boost/asio/io_service.hpp>
-#include <tianya_list.hpp>
 #include <QSortFilterProxyModel>
+#include <QtWidgets>
+
+#include <tianya_list.hpp>
 #include "tianyamodel.hpp"
 #include "ui_tianyawindow.h"
 

@@ -91,9 +91,15 @@ public:
 	}
 
 	template <class T>
-	void connect_hit_item_fetched(T&& t)
+	void connect_one_content_fetched(T&& t)
 	{
-		m_sig_hit_item_fetched.connect(t);
+		m_one_content_fetched.connect(t);
+	}
+
+	template <class T>
+	void connect_stoped(T&& t)
+	{
+		m_stoped.connect(t);
 	}
 
 	// 存文件.
@@ -264,6 +270,7 @@ protected:
 								boost::trim(m_context);
 								boost::replace_all(m_context, L"<br>", L"\n");
 								m_context_info.context.push_back(m_context);
+								m_one_content_fetched(m_context);
 							}
 						}
 					}
@@ -274,6 +281,8 @@ protected:
 			break;
 			}
 		}
+
+		m_stoped();
 	}
 
 private:
@@ -286,8 +295,14 @@ private:
 	std::wstring m_context;
 	std::string m_post_url;
 	std::string m_next_page_url;
+
+	// 完全停止后发射这个信号.
+	boost::signals2::signal<void()> m_stoped;
+	// 每获取到一帖发射这个信号.
+	boost::signals2::signal<void(std::wstring)> m_one_content_fetched;
+
 	enum {
-		state_unkown,			// 
+		state_unkown,			//
 		state_div_bbs_content,	// <div class="bbs-content
 		state_author			// <a href="javascript:void(0);" class="reportme a-link" replyid="0" replytime="2010-05-16 22:22:13" author="害我心跳180" authorId="20558716">举报</a> |
 	} m_state;
