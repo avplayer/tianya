@@ -1,4 +1,6 @@
 <RCC>
-  <qresource prefix="icon"/>
-  <qresource prefix="ui" />
+    <qresource prefix="/icon">
+        <file>tianya.svg</file>
+    </qresource>
+    <qresource prefix="/ui"/>
 </RCC>
