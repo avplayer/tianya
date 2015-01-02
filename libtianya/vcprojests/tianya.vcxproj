@@ -13,6 +13,10 @@
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\tianya_list.hpp" />
+    <ClInclude Include="..\include\util.hpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B773E321-5AEF-4E53-9437-51EC63F858D3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

@@ -18,8 +18,7 @@
 
 #include "util.hpp"
 
-namespace detail
-{
+namespace detail {
 
 	inline std::string get_chareset(std::string html_line)
 	{
@@ -28,11 +27,11 @@ namespace detail
 		boost::regex ex( "charset=([a-zA-Z0-9\\-_]+)" );
 		boost::regex ex2( "<meta charset=[\"\']?([a-zA-Z0-9\\-_]+)[\"\']?" );
 
-		if( boost::regex_search( html_line.c_str(), what, ex ) )
+		if (boost::regex_search(html_line.c_str(), what, ex))
 		{
 			return what[1];
 		}
-		else if( boost::regex_search( html_line.c_str(), what, ex2 ) )
+		else if (boost::regex_search(html_line.c_str(), what, ex2))
 		{
 			return what[1];
 		}
@@ -184,15 +183,17 @@ protected:
 		request_stream << "Accept: */*\r\n";
 		request_stream << "Connection: close\r\n\r\n";
 
-		std::size_t bytes_transferred = 0;
-
-		try
+		boost::asio::async_write(m_socket, m_request, yield[ec]);
+		if (ec)
 		{
-			boost::asio::async_write(m_socket, m_request, yield);
-			m_response.consume(m_response.size());
-			bytes_transferred = boost::asio::async_read_until(m_socket, m_response, "\r\n\r\n", yield);
+			m_socket.close(ec);
+			return;
+		}
 
-		}catch(const std::runtime_error& _ec)
+		std::size_t bytes_transferred = 0;
+		m_response.consume(m_response.size());
+		bytes_transferred = boost::asio::async_read_until(m_socket, m_response, "\r\n\r\n", yield[ec]);
+		if (ec)
 		{
 			m_socket.close(ec);
 			return;
@@ -227,19 +228,17 @@ protected:
 
 			html_line = ansi_wide(raw_html_line, html_page_chareset);
 
-
 			// 开始状态分析.
 			switch (m_state)
 			{
 			case state_unkown:
 			{
 				if (html_line.find(L"meta charset=") != std::wstring::npos)
-				{
-					// 获取真正的 编码
-					html_page_chareset = detail::get_chareset(raw_html_line);
-				}
+					html_page_chareset = detail::get_chareset(raw_html_line); // 获取真正的编码.
+
 				if (html_line.find(L"<td class=\"td-title facered\">") != std::string::npos)
 					m_state = state_found;
+
 				if (html_line.find(L"下一页") != std::string::npos)
 				{
 					std::string::size_type pos = 0;
