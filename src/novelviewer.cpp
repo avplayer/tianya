@@ -1,4 +1,4 @@
-#include <QTimer>
+﻿#include <QTimer>
 #include <QScrollBar>
 #include "syncobj.hpp"
 #include "novelviewer.hpp"
