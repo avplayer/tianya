@@ -50,6 +50,10 @@ find_package(Threads)
 find_package(Qt5Widgets REQUIRED)
 find_package(Boost REQUIRED COMPONENTS regex thread system locale context coroutine)
 
+if(MSVC)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LIBPATH:${Boost_LIBRARY_DIR}")
+endif()
+
 if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 	# For static Windows builds, we also need to pull in the Qt5 Platform
 	# support library, which is not exposed to CMake properly, unfortunately
