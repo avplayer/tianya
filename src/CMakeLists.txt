@@ -12,7 +12,7 @@ qt5_add_resources(RC_SRCS tianya.qrc)
 
 set(SRCS ${SRCS} ${UI_SRCS} ${RC_SRCS})
 
-add_executable(tianya WIN32 ${SRCS})
+add_executable(tianya WIN32 ${SRCS} dpi.manifest)
 
 target_include_directories(tianya PUBLIC ${Boost_INCLUDE_DIRS})
 
@@ -26,4 +26,8 @@ target_link_libraries(tianya ${CMAKE_THREAD_LIBS_INIT})
 
 if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 	target_link_libraries(tianya ${Qt5StaticExtra})
+endif()
+
+if(MSVC)
+	set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "/MANIFESTINPUT:${CMAKE_CURRENT_SOURCE_DIR}/dpi.manifest")
 endif()
