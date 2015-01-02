@@ -10,6 +10,42 @@ endif()
 
 option(ENABLE_QT_STATIC "link to static qt" ON)
 
+if(MSVC)
+	set(Boost_USE_STATIC_LIBS        ON)
+	set(Boost_USE_STATIC_RUNTIME    ON)
+endif()
+
+if(MSVC)
+set (CMAKE_CONFIGURATION_TYPES "Release;Debug")
+set(CompilerFlags
+        CMAKE_CXX_FLAGS
+        CMAKE_CXX_FLAGS_DEBUG
+        CMAKE_CXX_FLAGS_RELEASE
+		CMAKE_CXX_FLAGS_MinSizeRel
+        CMAKE_C_FLAGS
+        CMAKE_C_FLAGS_DEBUG
+        CMAKE_C_FLAGS_RELEASE
+		CMAKE_C_FLAGS_MinSizeRel
+   )
+
+foreach(CompilerFlag ${CompilerFlags})
+  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+endforeach()
+
+foreach(CompilerFlag ${CompilerFlags})
+  string(REPLACE "/W3" "/W1" ${CompilerFlag} "${${CompilerFlag}}")
+endforeach()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj /MP")
+
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}  /ignore:4099 /NODEFAULTLIB:libcmt.lib")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER}  /SAFESEH:NO")
+
+endif(MSVC)
+
+
+
 find_package(Threads)
 find_package(Qt5Widgets REQUIRED)
 find_package(Boost REQUIRED COMPONENTS regex thread system locale context coroutine)
@@ -52,10 +88,8 @@ if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 		SET(Qt5HB_LIBRARIES optimized ${Qt5HB_LIBRARIES_RELEASE} debug ${Qt5HB_LIBRARIES_DEBUG})
 	endif()
 	ADD_DEFINITIONS(-DSTATIC_QT5)
-
-	add_library(Qt5StaticExtra IMPORTED)
-	target_link_libraries(Qt5StaticExtra ${Qt5Platform_LIBRARIES} ${Qt5QWindows_LIBRARIES} ${Qt5QICO_LIBRARIES} ${Qt5HB_LIBRARIES_RELEASE})
-
+	set(Qt5StaticExtra ${Qt5Platform_LIBRARIES} ${Qt5QWindows_LIBRARIES} ${Qt5QICO_LIBRARIES} ${Qt5HB_LIBRARIES_RELEASE})
+	link_libraries(${Qt5Platform_LIBRARIES} ${Qt5QWindows_LIBRARIES} ${Qt5QICO_LIBRARIES} ${Qt5HB_LIBRARIES_RELEASE})
 endif()
 
 include_directories(libtianya/include)

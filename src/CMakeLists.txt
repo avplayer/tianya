@@ -18,5 +18,5 @@ target_link_libraries(tianya Qt5::Widgets ${Boost_LIBRARIES})
 target_link_libraries(tianya ${CMAKE_THREAD_LIBS_INIT})
 
 if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
-	target_link_libraries(tianya Qt5StaticExtra)
+	target_link_libraries(tianya ${Qt5StaticExtra})
 endif()
