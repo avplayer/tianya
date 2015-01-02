@@ -89,7 +89,7 @@ void TianyaWindow::real_start_tianya()
 			m_tianya_data_mode.update_tianya_list(hits_info);
 
 			// 更新状态栏
-			statusBar()->showMessage(QString("已更新到 %1 条").arg(m_tianya_data_mode.rowCount()));
+			statusBar()->showMessage(QStringLiteral("已更新到 %1 条").arg(m_tianya_data_mode.rowCount()));
 
 
 		});
@@ -132,7 +132,7 @@ void TianyaWindow::pop_up_context_menu(QPoint pos)
 
 			filedlg.setAcceptMode(QFileDialog::AcceptSave);
 			filedlg.setDefaultSuffix("csv");
-			filedlg.setNameFilter("电子表格 (*.csv)");
+			filedlg.setNameFilter(QStringLiteral("电子表格 (*.csv)"));
 
 			if (filedlg.exec() == QFileDialog::Accepted && filedlg.selectedFiles().size())
 			{
@@ -140,7 +140,7 @@ void TianyaWindow::pop_up_context_menu(QPoint pos)
 
 				std::cout << "save to " << savefilename.toStdString() << std::endl;
 
-				
+
 
 			}
 		});
