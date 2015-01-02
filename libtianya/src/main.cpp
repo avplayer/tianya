@@ -1,12 +1,13 @@
 ﻿#include <iostream>
 #include <map>
+#include <boost/smart_ptr.hpp>
 
 #include "tianya_context.hpp"
 #include "tianya_list.hpp"
 
-void terminator(boost::asio::io_service& io, tianya_context/*tianya*/&obj)
+void terminator(boost::asio::io_service& io, boost::shared_ptr<tianya_context>/*tianya*/&obj)
 {
-	obj.stop();
+	obj->stop();
 }
 
 int main(int argc, char** argv)
@@ -18,8 +19,8 @@ int main(int argc, char** argv)
 
 	std::locale::global(std::locale(""));
 
-	/*tianya*/tianya_context obj(io);
-	obj.start(post_url);
+	/*tianya*/boost::shared_ptr<tianya_context> obj = boost::make_shared<tianya_context>(boost::ref(io));
+	obj->start(post_url);
 
 	boost::asio::signal_set terminator_signal(io);
 	terminator_signal.add(SIGINT);
@@ -33,7 +34,7 @@ int main(int argc, char** argv)
 
 	std::string name = time_to_string(aux::gettime()) + ".txt";
 
-	obj.serialize_to_file(name);
+	obj->serialize_to_file(name);
 
 	return 0;
 }

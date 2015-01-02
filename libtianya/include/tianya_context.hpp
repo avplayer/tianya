@@ -11,6 +11,7 @@
 #include <functional>
 #include <atomic>
 
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/asio/spawn.hpp>
@@ -33,7 +34,7 @@ struct context_info
 	std::vector<std::wstring> context;
 };
 
-class tianya_context : public boost::noncopyable
+class tianya_context : public boost::enable_shared_from_this<tianya_context>
 {
 public:
 	tianya_context(boost::asio::io_service& io)
@@ -46,6 +47,7 @@ public:
 public:
 	void start(const std::string& post_url)
 	{
+		auto self = shared_from_this();
 		m_post_url = post_url;
 		m_state = state_unkown;
 		url_info ui = parser_url(m_post_url);
@@ -54,7 +56,7 @@ public:
 		port_string << ui.port;
 		tcp::resolver::query query(ui.domain, port_string.str());
 		m_resolver.async_resolve(query,
-		[this, ui](const boost::system::error_code& error, tcp::resolver::iterator endpoint_iterator)
+		[this, self, ui](const boost::system::error_code& error, tcp::resolver::iterator endpoint_iterator)
 		{
 			if (!error)
 			{
@@ -64,12 +66,12 @@ public:
 					m_socket.close(ignore_ec);
 				}
 				boost::asio::async_connect(m_socket, endpoint_iterator,
-				[this, ui](const boost::system::error_code& error, tcp::resolver::iterator endpoint_iterator)
+				[this, self, ui](const boost::system::error_code& error, tcp::resolver::iterator endpoint_iterator)
 				{
 					if (!error)
 					{
 						boost::asio::spawn(m_io_service,
-						[this, ui](boost::asio::yield_context yield)
+						[this, self, ui](boost::asio::yield_context yield)
 						{
 							if (!process_handle(yield, ui))
 								m_download_complete();
