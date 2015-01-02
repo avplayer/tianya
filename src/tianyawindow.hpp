@@ -16,7 +16,7 @@ class TianyaWindow : public QMainWindow
 
 public:
 	explicit TianyaWindow(boost::asio::io_service& , QWidget* parent = 0);
-	~TianyaWindow();
+	virtual ~TianyaWindow();
 
 protected:
 	virtual void changeEvent(QEvent *e) Q_DECL_OVERRIDE;

@@ -14,7 +14,7 @@ class NovelViewer : public QMainWindow
 
 public:
 	explicit NovelViewer(boost::asio::io_service&, list_info, QWidget *parent = 0);
-	~NovelViewer();
+	virtual ~NovelViewer();
 
 protected:
 	void changeEvent(QEvent *e);

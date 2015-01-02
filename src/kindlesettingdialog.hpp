@@ -13,6 +13,8 @@ class KindleSettingDialog : public QDialog
 public:
 	explicit KindleSettingDialog(QWidget *parent = 0);
 
+	virtual ~KindleSettingDialog();
+
 protected:
 	void changeEvent(QEvent *e);
 

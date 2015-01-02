@@ -11,6 +11,7 @@ class TianyaModel : public QAbstractTableModel
 public:
 
     explicit TianyaModel(QObject* parent = 0);
+	virtual ~TianyaModel(){}
 
 	void update_tianya_list(const list_info& hits_info);
 
