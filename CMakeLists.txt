@@ -15,6 +15,17 @@ if(MSVC)
 	set(Boost_USE_STATIC_RUNTIME    ON)
 endif()
 
+if(WIN32)
+	add_definitions(-DBOOST_ALL_STATIC_LINK)
+	add_definitions(-DBOOST_THREAD_USE_LIB)
+	add_definitions(-DBOOST_FILESYSTEM_STATIC_LINK)
+	add_definitions(-DBOOST_ALL_STATIC_LINK)
+	add_definitions(-DWIN32_LEAN_AND_MEAN)
+	add_definitions(-DNOMINMAX)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	add_definitions(-D_WIN32_WINNT=0x0501)
+endif()
+
 if(MSVC)
 set (CMAKE_CONFIGURATION_TYPES "Release;Debug")
 set(CompilerFlags
