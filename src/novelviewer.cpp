@@ -9,6 +9,7 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 	, m_list_info(info)
 	, m_first_append(true)
 	, m_tianya_context(io)
+	, m_quited(std::make_shared<bool>(false))
 {
 	ui.setupUi(this);
 
@@ -18,8 +19,12 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 
 	ui.textBrowser->clear();
 
-	m_tianya_context.connect_one_content_fetched([this](std::wstring content)
+	auto quited = m_quited;
+
+	m_tianya_context.connect_one_content_fetched([this, quited](std::wstring content)
 	{
+		if (*quited)
+			return;
 		post_on_gui_thread([this, content]()
 		{
 			// 向文本控件添加文字.
@@ -39,6 +44,7 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 
 NovelViewer::~NovelViewer()
 {
+	* m_quited = true;
 }
 
 void NovelViewer::changeEvent(QEvent *e)

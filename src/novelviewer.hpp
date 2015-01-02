@@ -31,4 +31,6 @@ private:
 	tianya_context m_tianya_context;
 
 	bool m_first_append;
+
+	std::shared_ptr<bool> m_quited;
 };
