@@ -35,7 +35,7 @@ private:
 
 	bool m_fist_insertion;
 
-	tianya m_tianya;
+	tianya_list m_tianya;
 
 	TianyaModel m_tianya_data_mode;
 	QSortFilterProxyModel m_sortproxy_for_tianya_data_mode;
