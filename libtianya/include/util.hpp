@@ -57,6 +57,7 @@ inline std::wstring ansi_wide(
 inline std::wstring ansi_wide(const std::string& source)
 {
 	std::wstring wide;
+	wide.reserve(source.size());
 	wchar_t dest;
 	std::size_t max = source.size();
 

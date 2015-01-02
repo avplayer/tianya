@@ -42,6 +42,7 @@ static SyncObjec * _syncobj;
 
 int main(int argc, char *argv[])
 {
+	std::locale::global(std::locale(""));
 	// work arround VC
 	SyncObjec syncobj;
 	_syncobj = &syncobj;
