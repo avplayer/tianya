@@ -90,15 +90,15 @@ public:
 	}
 
 	template <class T>
-	void connect_one_content_fetched(T&& t)
+	boost::signals2::connection connect_one_content_fetched(T&& t)
 	{
-		m_one_content_fetched.connect(t);
+		return m_one_content_fetched.connect(t);
 	}
 
 	template <class T>
-	void connect_download_complete(T&& t)
+	boost::signals2::connection connect_download_complete(T&& t)
 	{
-		m_download_complete.connect(t);
+		return m_download_complete.connect(t);
 	}
 
 	// 存文件.
