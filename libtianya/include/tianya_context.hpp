@@ -109,14 +109,14 @@ public:
 		if (!fp)
 			return;
 
-		// UTF-16 big endian with BOM.
-		std::fwrite("\xfe\xff", 2, 1, fp.get());
+		// UTF-8 big endian with BOM.
+		std::fwrite("\xEF\xBB\xBF", 3, 1, fp.get());
 
 		for (auto& item : m_context_info.context)
 		{
 			const std::wstring& buffer = item;
-			std::fwrite(buffer.c_str(), buffer.size(), 1, fp.get());
-			// std::fputws(buffer.c_str(), fp.get());
+			std::string utf8 = wide_utf8(buffer);
+			std::fwrite(utf8.c_str(), utf8.size(), 1, fp.get());
 		}
 	}
 
@@ -208,7 +208,7 @@ protected:
 					}
 				}
 
-				if (html_line.find(L"<div class=\"bbs-content\"") != std::string::npos)
+				if (html_line.find(L"<div class=\"bbs-content") != std::string::npos)
 				{
 					m_context.clear();
 					m_state = state_div_bbs_content;
