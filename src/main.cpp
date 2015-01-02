@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
 	app.setOrganizationName("avplayer");
 	app.setOrganizationDomain("avplayer.org");
 	app.setApplicationName("tianyaradar");
+	app.setWindowIcon(QIcon(":/icon/tianya.svg"));
 
 	// 创建 主窗口
 	TianyaWindow mainwindow(app.get_io_service());

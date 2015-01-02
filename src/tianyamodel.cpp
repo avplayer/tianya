@@ -104,6 +104,18 @@ QVariant TianyaModel::data(const QModelIndex& index, int role) const
 			v.setValue(info);
 			return v;
 		}
+		else if (role == Qt::UserRole+3)
+		{
+			switch(index.column())
+			{
+				case 0:
+					return  QString::fromStdWString(info.title);
+				case 1:
+					return  QString::fromStdWString(info.author);
+				default:
+					return QVariant();
+			}
+		}
 	}
 
 	return QVariant();
