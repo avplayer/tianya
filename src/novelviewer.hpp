@@ -24,8 +24,16 @@ private Q_SLOTS:
 	void text_brower_stay_on_top();
 	void download_complete();
 
+	void save_to_file(QString);
+
+	void save_to();
+
 private:
 	Ui::NovelViewer ui;
 	boost::asio::io_service& m_io_service;
+	std::wstring m_title;
 	tianya_download m_tianya_download;
+
+	QAction* m_action_send_to_kindkle;
+    QAction* m_action_save_to_file;
 };

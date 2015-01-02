@@ -14,6 +14,8 @@ public:
 
 	virtual ~tianya_download();
 
+	std::shared_ptr<tianya_context> get_tianya_context(){return m_tianya_context;}
+
 public Q_SLOTS:
 	void start();
 

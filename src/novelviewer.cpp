@@ -1,5 +1,10 @@
-﻿#include <QTimer>
-#include <QScrollBar>
+﻿
+#include <fstream>
+
+#include <QTimer>
+#include <QtWidgets>
+#include <QFileDialog>
+
 #include "novelviewer.hpp"
 
 NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *parent)
@@ -8,6 +13,8 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 	, m_tianya_download(io, info)
 {
 	ui.setupUi(this);
+
+	m_title = info.title;
 
 	auto title = QString("%1 - %2").arg(QString::fromStdWString(info.title)).arg(QString::fromStdWString(info.author));
 
@@ -21,6 +28,21 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 	connect(&m_tianya_download, SIGNAL(download_complete()), this, SLOT(download_complete()));
 
 	m_tianya_download.start();
+
+	m_action_send_to_kindkle = menuBar()->addAction(QStringLiteral("发送到 kindle(&K)"));
+	m_action_save_to_file = menuBar()->addAction(QStringLiteral("保存文件(&S)"));
+
+	connect(m_action_send_to_kindkle, &QAction::hovered, this, [this]()
+	{
+		statusBar()->showMessage(QStringLiteral("将当前文章发送到 Kindle 设备"));
+	});
+
+	connect(m_action_save_to_file, &QAction::hovered, this, [this]()
+	{
+		statusBar()->showMessage(QStringLiteral("将当前文章保存到文件"));
+	});
+
+	connect(m_action_save_to_file, SIGNAL(triggered(bool)), this, SLOT(save_to()));
 
 	statusBar()->showMessage(QStringLiteral("下载中..."));
 }
@@ -52,3 +74,41 @@ void NovelViewer::download_complete()
 	statusBar()->showMessage(QStringLiteral("下载完成"));
 }
 
+void NovelViewer::save_to()
+{
+	QFileDialog filedlg(this);
+
+	filedlg.setAcceptMode(QFileDialog::AcceptSave);
+	filedlg.setDefaultSuffix("txt");
+	filedlg.setNameFilter(QStringLiteral("文本文件 (*.txt)"));
+
+	QString suggested_filename = QString("%1.txt").arg(QString::fromStdWString(m_title));
+
+	filedlg.selectFile(suggested_filename);
+
+	if (filedlg.exec() == QFileDialog::Accepted && filedlg.selectedFiles().size())
+	{
+		QString savefilename = filedlg.selectedFiles().first();
+
+		save_to_file(savefilename);
+	}
+}
+
+void NovelViewer::save_to_file(QString filename)
+{
+	std::shared_ptr<std::ofstream> filestream = std::make_shared<std::ofstream>();
+
+	filestream->open(filename.toUtf8().data(), std::ofstream::out);
+	if (filestream->is_open())
+	{
+		// add BOM
+		filestream->write("\357\273\277", 3);
+
+		auto _tianya_context = m_tianya_download.get_tianya_context();
+
+		m_io_service.post([this, filestream, _tianya_context]()
+		{
+			_tianya_context->serialize_to_stream(filestream.get());
+		});
+	}
+}

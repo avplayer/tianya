@@ -120,6 +120,14 @@ public:
 		}
 	}
 
+	void serialize_to_stream(std::ostream* ostream)
+	{
+		for (auto& item : m_context_info.context)
+		{
+			*ostream << wide_utf8(item);
+		}
+	}
+
 protected:
 
 	bool process_handle(boost::asio::yield_context& yield, const url_info& ui)
