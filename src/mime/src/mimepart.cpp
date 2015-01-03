@@ -147,7 +147,7 @@ void MimePart::prepare()
 
     if (cName != "")
 	{
-        mimeString.append("; name*=UTF-8\'\'").append(cName.toUtf8().toPercentEncoding());
+        mimeString.append("; name=\"").append(cName.toUtf8()).append("\"");
 	}
 
     if (cCharset != "")

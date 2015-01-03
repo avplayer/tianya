@@ -51,6 +51,11 @@ void MimeAttachment::prepare()
     /* Content-Type */
     mimeString.append("Content-Type: ").append(cType);
 
+	if (cName != "")
+	{
+        mimeString.append("; name*=UTF-8\'\'").append(cName.toUtf8().toPercentEncoding());
+	}
+
     mimeString.append("\r\n");
     /* ------------ */
 
