@@ -330,8 +330,7 @@ protected:
 								bool filter = false;
 								if (m_filter_reply)
 								{
-									if (m_context.size() < 500 ||
-										m_context.find(L"——————————————————————") != std::wstring::npos)
+									if (m_context.find(L"——————————————————————") != std::wstring::npos)
 									{
 										filter = true;
 									}
@@ -366,7 +365,23 @@ protected:
 									}
 								}
 								if (!filter)
+								{
+									while (true)
+									{
+										boost::wsmatch what;
+										boost::wregex ex(L"</{0,1}(font|span)(.*?)>");
+										if (boost::regex_search(m_context, what, ex))
+										{
+											std::wstring str = what.str();
+											boost::replace_all(m_context, str, L"");
+										}
+										else
+										{
+											break;
+										}
+									}
 									m_context_info.context.push_back(m_context);
+								}
 								m_one_content_fetched(m_context);
 							}
 						}
