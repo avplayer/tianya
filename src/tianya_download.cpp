@@ -122,8 +122,8 @@ void tianya_download::start_send_mail(EmailAddress mail_rcpt)
     message->setSubject("Convert");
 
 	auto text_part = std::make_shared<MimeText>();
-    text_part->setText("Hi!\n This is an email with some attachments.");
-    message->addPart(text_part.get());
+    text_part->setText("please convert this attachment and send it to my kindle");
+	message->addPart(text_part.get());
 
 	QBuffer articlecontent;
 	articlecontent.open(QBuffer::ReadWrite);
@@ -134,7 +134,7 @@ void tianya_download::start_send_mail(EmailAddress mail_rcpt)
 
 	std::shared_ptr<MimeAttachment> attachment;
 
-	attachment.reset(new MimeAttachment(articlecontent.buffer(), QString("%1.txt").arg(QString::fromStdWString(m_list_info.title))));
+	attachment.reset(new MimeAttachment(articlecontent.buffer(), QStringLiteral("%1.txt").arg(QString::fromStdWString(m_list_info.title))));
 
 	message->addPart(attachment.get());
 
