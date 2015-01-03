@@ -147,7 +147,8 @@ void MimePart::prepare()
 
     if (cName != "")
 	{
-        mimeString.append("; name=\"").append(cName.toUtf8()).append("\"");
+		// =?UTF-8?B?W+adguaWh+S5puivhF3kuIDpnaLpgI/op4bopb/mlrnmlofljJbnmoTplZzlrZAudHh0?=
+        mimeString.append("; name=\"=?UTF-8?B?").append(cName.toUtf8().toBase64()).append("?=\"");
 	}
 
     if (cCharset != "")
