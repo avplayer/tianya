@@ -13,7 +13,7 @@ void terminator(boost::asio::io_service& io, std::shared_ptr<tianya_context>/*ti
 int main(int argc, char** argv)
 {
 	boost::asio::io_service io;
-	std::string post_url = "http://bbs.tianya.cn/post-culture-354078-1.shtml"; // http://bbs.tianya.cn/list.jsp?item=culture&grade=1&order=1
+	std::string post_url = "http://bbs.tianya.cn/post-culture-520191-1.shtml"; // http://bbs.tianya.cn/list.jsp?item=culture&grade=1&order=1 http://bbs.tianya.cn/post-culture-354078-1.shtml
 	if (argc == 2)
 		post_url = std::string(argv[1]);
 

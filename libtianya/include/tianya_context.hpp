@@ -42,6 +42,8 @@ public:
 		: m_io_service(io)
 		, m_socket(io)
 		, m_resolver(io)
+		, m_page_index(0)
+		, m_page_count(-1)
 		, m_filter_reply(false)
 		, m_abort(false)
 	{}
@@ -99,6 +101,16 @@ public:
 	bool filter_reply() const
 	{
 		return m_filter_reply;
+	}
+
+	int page_count() const
+	{
+		return m_page_count;
+	}
+
+	int page_index() const
+	{
+		return m_page_index;
 	}
 
 	template <class T>
@@ -244,6 +256,17 @@ protected:
 					m_state = state_div_bbs_content;
 				}
 
+				if (m_page_count == -1)
+				{
+					if (html_line.find(L"pageCount :") != std::wstring::npos)
+					{
+						boost::trim(html_line);
+						int ret = std::swscanf(html_line.c_str(), L"pageCount : %d,", &m_page_count);
+						if (ret != 1)
+							std::cerr << "parser pageCount failed!" << std::endl;
+					}
+				}
+
 				if (html_line.find(L"下页") != std::wstring::npos)
 				{
 					if (m_next_page_url.empty()) // first found next page, skip.
@@ -261,6 +284,7 @@ protected:
 								html_line = html_line.substr(0, pos);
 								boost::trim(html_line);
 								m_next_page_url = wide_utf8(L"http://bbs.tianya.cn" + html_line);
+								m_page_index++;
 								start(m_next_page_url);
 								m_next_page_url = "";
 								return true;
@@ -312,19 +336,32 @@ protected:
 									}
 									else
 									{
-										std::for_each(m_users.begin(), m_users.end(),
-										[this, &filter](const std::wstring& s)
+										if (m_context.find(L"：") != std::wstring::npos || m_context.find(L"@") != std::wstring::npos)
 										{
-											std::wstring test = L"@" + s;
-											if (m_context.find(test) != std::wstring::npos)
-												filter = true;
-											test = L"作者：" + s;
-											if (m_context.find(test) != std::wstring::npos)
-												filter = true;
-											test = s + L"：";
-											if (m_context.find(test) != std::wstring::npos)
-												filter = true;
-										});
+											std::for_each(m_users.begin(), m_users.end(),
+											[this, &filter](const std::wstring& s)
+											{
+												std::wstring test = L"@" + s;
+												if (m_context.find(test) != std::wstring::npos)
+												{
+													filter = true;
+												}
+												else
+												{
+													test = L"作者：" + s;
+													if (m_context.find(test) != std::wstring::npos)
+													{
+														filter = true;
+													}
+													else
+													{
+														test = s + L"：";
+														if (m_context.find(test) != std::wstring::npos)
+															filter = true;
+													}
+												}
+											});
+										}
 									}
 								}
 								if (!filter)
@@ -353,6 +390,8 @@ private:
 	std::wstring m_context;
 	std::string m_post_url;
 	std::string m_next_page_url;
+	int m_page_index;
+	int m_page_count;
 	bool m_filter_reply;
 	std::set<std::wstring> m_users;
 	// 完全下载完成后发射这个信号.
