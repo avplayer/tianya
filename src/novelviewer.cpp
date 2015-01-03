@@ -117,6 +117,7 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 	connect(&m_tianya_download, &tianya_download::download_complete, m_progress_bar, [this]()
 	{
 		m_progress_bar->setValue(100);
+		QTimer::singleShot(3000, m_progress_bar, SLOT(deleteLater()));
 	});
 }
 
