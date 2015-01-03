@@ -274,7 +274,7 @@ protected:
 				while (true)
 				{
 					boost::wsmatch what;
-					boost::wregex ex(L"</{0,1}(font|span)(.*?)>");
+					boost::wregex ex(L"</{0,1}(font|span|strong)(.*?)>");
 					if (boost::regex_search(html_line, what, ex))
 					{
 						std::wstring str = what.str();
