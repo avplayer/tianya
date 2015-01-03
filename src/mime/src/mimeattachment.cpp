@@ -46,6 +46,8 @@ void MimeAttachment::prepare()
 
     mimeString = QString();
 
+	mimeString.append(header).append("\r\n");
+
     /* === Header Prepare === */
 
     /* Content-Type */
@@ -53,10 +55,10 @@ void MimeAttachment::prepare()
 
 	if (cName != "")
 	{
-        mimeString.append("; name*=UTF-8\'\'").append(cName.toUtf8().toPercentEncoding());
+        mimeString.append("; name*=utf-8\'\'").append(cName.toUtf8());
 	}
 
-    mimeString.append("\r\n");
+	mimeString.append("\r\n");
     /* ------------ */
 
     /* Content-Transfer-Encoding */
@@ -85,7 +87,6 @@ void MimeAttachment::prepare()
 
     /* Addition header lines */
 
-    mimeString.append(header).append("\r\n");
 
     /* ------------------------- */
 
