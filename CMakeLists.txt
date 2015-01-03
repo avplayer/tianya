@@ -59,11 +59,18 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER}  /SAFESEH:NO")
 
 endif(MSVC)
 
-
+if(WIN32)
+add_subdirectory(third_party/openssl)
+else()
+find_package(OpenSSL REQUIRED)
+endif()
 
 find_package(Threads)
 find_package(Qt5Widgets REQUIRED)
 find_package(Boost REQUIRED COMPONENTS regex thread system locale context coroutine)
+
+include_directories(${OPENSSL_INCLUDE_DIR})
+link_libraries(${OPENSSL_LIBRARIES})
 
 if(MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LIBPATH:${Boost_LIBRARY_DIR}")
@@ -112,6 +119,7 @@ if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 endif()
 
 include_directories(libtianya/include)
+include_directories(avboost/include)
 
 add_subdirectory(src)
 

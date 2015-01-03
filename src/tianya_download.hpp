@@ -7,6 +7,7 @@
 #include <tianya_list.hpp>
 
 #include "emailaddress.hpp"
+#include "smtpclient/smtp.hpp"
 
 class tianya_download : public QObject
 {
@@ -39,7 +40,6 @@ Q_SIGNALS:
 	void timed_first_timershot();
 
 	void send_complete();
-	void send_status_notify(QString);
 
 	void download_progress_report(double);
 	void mailsend_progress_report(double);
@@ -52,6 +52,7 @@ private:
 	boost::signals2::scoped_connection m_connection_notify_complete;
 
 	std::shared_ptr<tianya_context> m_tianya_context;
+	std::shared_ptr<mx::smtp> m_smtp;
 
 	std::shared_ptr<bool> m_is_gone;
 	bool m_first_chunk;

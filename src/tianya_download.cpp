@@ -8,6 +8,8 @@
 #include <QFile>
 
 #include "mimemessage.hpp"
+#include "mimeattachment.hpp"
+#include "mimetext.hpp"
 
 #include "syncobj.hpp"
 #include "tianya_download.hpp"
@@ -98,10 +100,66 @@ void tianya_download::save_to_file(QString filename)
 	}
 }
 
-void tianya_download::start_send_mail(EmailAddress target)
+void tianya_download::start_send_mail(EmailAddress mail_rcpt)
 {
-	
+	QSettings settings;
 
+	EmailAddress mail_sender(settings.value("kindle.usermail").toString().toUtf8().toStdString() , "Tianya Radar");
+	QString password = settings.value("kindle.usermail_passwd").toString();
 
+	m_smtp.reset(new mx::smtp(m_io_service, mail_sender.getAddress(), password.toUtf8().toStdString()));
+
+	InternetMailFormat imf;
+
+	imf.header["from"] = mail_sender.getAddress();
+	imf.header["to"] = mail_rcpt.getAddress();
+	imf.header["subject"] = "[convert]";
+
+	std::shared_ptr<MimeMessage> message = std::make_shared<MimeMessage>();
+
+	message->setSender(mail_sender);
+	message->addRecipient(mail_rcpt);
+    message->setSubject("[convert]");
+
+	auto text_part = std::make_shared<MimeText>();
+    text_part->setText("Hi!\n This is an email with some attachments.");
+    message->addPart(text_part.get());
+
+	QBuffer articlecontent;
+	articlecontent.open(QBuffer::ReadWrite);
+
+	m_tianya_context->serialize_to_io_device(&articlecontent);
+
+	articlecontent.seek(0);
+
+	std::shared_ptr<MimeAttachment> attachment;
+
+	attachment.reset(new MimeAttachment(articlecontent.buffer(), QString("%1.txt").arg(QString::fromStdWString(m_list_info.title))));
+
+	message->addPart(attachment.get());
+
+	mailsend_progress_report(0.5);
+
+	imf.custom_data = [message, text_part, attachment](std::ostream* o)
+	{
+		*o << message->toString().toUtf8().toStdString();
+	};
+
+	auto is_gone = m_is_gone;
+	m_smtp->async_sendmail(imf, [this, is_gone](const boost::system::error_code & ec)
+	{
+		if (*is_gone)
+			return;
+
+		post_on_gui_thread([this, is_gone]()
+		{
+			if (*is_gone)
+				return;
+			// nice
+			mailsend_progress_report(1.0);
+
+			send_complete();
+		});
+	});
 }
 

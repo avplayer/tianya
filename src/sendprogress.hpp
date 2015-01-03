@@ -18,12 +18,15 @@ public Q_SLOTS:
 	// 开始.
 	void start();
 
-	void set_work_percent(double);
 
 private Q_SLOTS:
 
 	void start_sendmail();
 
+	void set_download_work_percent(double);
+	void set_send_work_percent(double);
+
+	void mail_sended();
 
 private:
     Ui::SendProgress ui;

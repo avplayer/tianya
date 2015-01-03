@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <QString>
+#include <string>
 
 class EmailAddress
 {
@@ -27,7 +27,7 @@ public:
     /* [1] Constructors and Destructors */
 
     EmailAddress();
-    EmailAddress(const QString & address, const QString & name="");
+    EmailAddress(const std::string & address, const std::string & name="");
 
     ~EmailAddress();
 
@@ -35,11 +35,11 @@ public:
 
 
     /* [2] Getters and Setters */
-    void setName(const QString & name);
-    void setAddress(const QString & address);
+    void setName(const std::string & name);
+    void setAddress(const std::string & address);
 
-    const QString & getName() const;
-    const QString & getAddress() const;
+    const std::string & getName() const;
+    const std::string & getAddress() const;
 
     /* [2] --- */
 
@@ -48,8 +48,8 @@ private:
 
     /* [3] Private members */
 
-    QString name;
-    QString address;
+    std::string name;
+    std::string address;
 
     /* [3] --- */
 };

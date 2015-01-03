@@ -5,6 +5,7 @@ cmake_policy(SET CMP0020 NEW)
 add_definitions(-DQT_NO_KEYWORDS)
 
 add_subdirectory(mime/)
+add_subdirectory(smtpclient/)
 
 configure_file(tianya.rc.in ${CMAKE_CURRENT_BINARY_DIR}/tianya.rc)
 
@@ -20,7 +21,9 @@ add_executable(tianya WIN32 ${SRCS} dpi.manifest  ${CMAKE_CURRENT_BINARY_DIR}/ti
 
 target_include_directories(tianya PUBLIC ${Boost_INCLUDE_DIRS})
 
-target_link_libraries(tianya mailmime Qt5::Widgets)
+target_link_libraries(tianya mailmime smtpclient Qt5::Widgets)
+
+# target_link_libraries(tianya OPENS)
 
 if(NOT MSVC)
 target_link_libraries(tianya  ${Boost_LIBRARIES})

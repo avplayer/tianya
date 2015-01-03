@@ -46,18 +46,18 @@ public:
 
     /* [2] Getters and Setters */
 
-    void setSender(EmailAddress* e);
-    void addRecipient(EmailAddress* rcpt, RecipientType type = To);
-    void addTo(EmailAddress* rcpt);
-    void addCc(EmailAddress* rcpt);
-    void addBcc(EmailAddress* rcpt);
+    void setSender(EmailAddress e);
+    void addRecipient(EmailAddress rcpt, MimeMessage::RecipientType type = To);
+    void addTo(EmailAddress rcpt);
+    void addCc(EmailAddress rcpt);
+    void addBcc(EmailAddress rcpt);
     void setSubject(const QString & subject);
     void addPart(MimePart* part);
 
     void setHeaderEncoding(MimePart::Encoding);
 
     const EmailAddress & getSender() const;
-    const QList<EmailAddress*> & getRecipients(RecipientType type = To) const;
+    const QList< EmailAddress >& getRecipients(MimeMessage::RecipientType type = To) const;
     const QString & getSubject() const;
     const QList<MimePart*> & getParts() const;
 
@@ -76,8 +76,8 @@ protected:
 
     /* [4] Protected members */
 
-    EmailAddress* sender;
-    QList<EmailAddress*> recipientsTo, recipientsCc, recipientsBcc;
+    EmailAddress sender;
+    QList<EmailAddress> recipientsTo, recipientsCc, recipientsBcc;
     QString subject;
     MimePart *content;
     bool autoMimeContentCreated;
