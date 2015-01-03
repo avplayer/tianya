@@ -135,6 +135,7 @@ void tianya_download::start_send_mail(EmailAddress mail_rcpt)
 	std::shared_ptr<MimeAttachment> attachment;
 
 	attachment.reset(new MimeAttachment(articlecontent.buffer(), QStringLiteral("%1.txt").arg(QString::fromStdWString(m_list_info.title))));
+	attachment->setCharset("utf-8");
 
 	message->addPart(attachment.get());
 

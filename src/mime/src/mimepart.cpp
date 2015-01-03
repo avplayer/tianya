@@ -23,7 +23,7 @@
 
 MimePart::MimePart()
 {
-    cEncoding = _7Bit;
+    cEncoding = Base64;
     prepared = false;
     cBoundary = "";
 }
