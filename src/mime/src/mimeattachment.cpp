@@ -41,10 +41,77 @@ MimeAttachment::~MimeAttachment()
 
 void MimeAttachment::prepare()
 {
-    this->header += "Content-disposition: attachment\r\n";
+    this->header += "Content-disposition: attachment";
+	this->header.append("; filename*=UTF-8\'\'").append(cName.toUtf8().toPercentEncoding()).append("\r\n");
 
-    /* !!! IMPORTANT !!! */
-    MimeFile::prepare();
+    mimeString = QString();
+
+    /* === Header Prepare === */
+
+    /* Content-Type */
+    mimeString.append("Content-Type: ").append(cType);
+
+    mimeString.append("\r\n");
+    /* ------------ */
+
+    /* Content-Transfer-Encoding */
+    mimeString.append("Content-Transfer-Encoding: ");
+    switch (cEncoding)
+    {
+    case _7Bit:
+        mimeString.append("7bit\r\n");
+        break;
+    case _8Bit:
+        mimeString.append("8bit\r\n");
+        break;
+    case Base64:
+        mimeString.append("base64\r\n");
+        break;
+    case QuotedPrintable:
+        mimeString.append("quoted-printable\r\n");
+        break;
+    }
+    /* ------------------------ */
+
+    /* Content-Id */
+    if (cId != NULL)
+        mimeString.append("Content-ID: <").append(cId).append(">\r\n");
+    /* ---------- */
+
+    /* Addition header lines */
+
+    mimeString.append(header).append("\r\n");
+
+    /* ------------------------- */
+
+    /* === End of Header Prepare === */
+
+    /* === Content === */
+    switch (cEncoding)
+    {
+    case _7Bit:
+        mimeString.append(QString(content).toLatin1());
+        break;
+    case _8Bit:
+        mimeString.append(content);
+        break;
+    case Base64:
+        mimeString.append(formatter.format(content.toBase64()));
+        break;
+    }
+    mimeString.append("\r\n");
+    /* === End of Content === */
+
+    prepared = true;
+
 }
+
+QString MimeAttachment::toString()
+{
+	if(!prepared)
+		prepare();
+    return mimeString;
+}
+
 
 /* [2] --- */

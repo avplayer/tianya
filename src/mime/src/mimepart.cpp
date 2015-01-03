@@ -146,7 +146,9 @@ void MimePart::prepare()
     mimeString.append("Content-Type: ").append(cType);
 
     if (cName != "")
-        mimeString.append("; name=\"").append(cName).append("\"");
+	{
+        mimeString.append("; name*=UTF-8\'\'").append(cName.toUtf8().toPercentEncoding());
+	}
 
     if (cCharset != "")
         mimeString.append("; charset=").append(cCharset);

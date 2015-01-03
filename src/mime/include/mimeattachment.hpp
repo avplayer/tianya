@@ -44,6 +44,7 @@ protected:
     /* [2] Protected methods */
 
     virtual void prepare();
+    virtual QString toString();
 
     /* [2] --- */
 };

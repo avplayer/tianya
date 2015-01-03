@@ -143,7 +143,7 @@ void tianya_download::start_send_mail(EmailAddress mail_rcpt)
 
 	imf.custom_data = [message, text_part, attachment](std::ostream* o)
 	{
-		*o << message->toString().toUtf8().toStdString();
+		*o << message->toString().toStdString();
 	};
 
 	auto is_gone = m_is_gone;
