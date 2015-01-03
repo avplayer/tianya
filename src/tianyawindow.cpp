@@ -47,6 +47,14 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	auto qsetkindke_button = new QPushButton(QStringLiteral("设置Kindle邮箱"), menuWidget());
 	hbox->addWidget(qsetkindke_button);
 
+	auto tianya = new QCheckBox(QStringLiteral("天涯"));
+	hbox->addWidget(tianya);
+	tianya->setChecked(true);
+	tianya->setDisabled(true);
+
+	hbox->addWidget(new QCheckBox(QStringLiteral("起点")));
+
+
 	hbox->addWidget(new QFrame(menuWidget()));
 
 	auto qlineedit = new QLineEdit(menuWidget());
