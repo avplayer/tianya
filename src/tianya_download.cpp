@@ -121,10 +121,6 @@ void tianya_download::start_send_mail(EmailAddress mail_rcpt)
 	message->addRecipient(mail_rcpt);
     message->setSubject("Convert");
 
-	auto text_part = std::make_shared<MimeText>();
-    text_part->setText("please convert this attachment and send it to my kindle");
-	message->addPart(text_part.get());
-
 	QBuffer articlecontent;
 	articlecontent.open(QBuffer::ReadWrite);
 
@@ -142,7 +138,7 @@ void tianya_download::start_send_mail(EmailAddress mail_rcpt)
 
 	mailsend_progress_report(0.5);
 
-	imf.custom_data = [message, text_part, attachment](std::ostream* o)
+	imf.custom_data = [message, attachment](std::ostream* o)
 	{
 		*o << message->toString().toStdString();
 	};
