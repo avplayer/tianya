@@ -41,6 +41,8 @@ private Q_SLOTS:
 	void save_to();
 	void set_filter_reply(bool);
 
+	void mail_to();
+
 
 private:
 	Ui::NovelViewer ui;
@@ -48,7 +50,7 @@ private:
 	std::wstring m_title;
 	tianya_download m_tianya_download;
 
-	QAction* m_action_send_to_kindkle;
+	QAction* m_action_send_to_kindle;
     QAction* m_action_save_to_file;
     QToolBar* m_toolbar;
     QProgressBar* m_progress_bar;

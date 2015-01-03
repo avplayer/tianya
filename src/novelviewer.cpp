@@ -71,8 +71,8 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 
 	m_tianya_download.start_download();
 
-	m_action_send_to_kindkle = m_toolbar->addAction(QStringLiteral("发送到 kindle(&K)"));
-	m_action_send_to_kindkle->setShortcuts({QKeySequence("Ctrl+K"), QKeySequence("Alt+K")});
+	m_action_send_to_kindle = m_toolbar->addAction(QStringLiteral("发送到 kindle(&K)"));
+	m_action_send_to_kindle->setShortcuts({QKeySequence("Ctrl+K"), QKeySequence("Alt+K")});
 	m_toolbar->addSeparator();
 
 	m_action_save_to_file = m_toolbar->addAction(QStringLiteral("保存文件(&S)"));
@@ -90,10 +90,12 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 
 	m_toolbar->addWidget(cbox);
 
-	connect(m_action_send_to_kindkle, &QAction::hovered, this, [this]()
+	connect(m_action_send_to_kindle, &QAction::hovered, this, [this]()
 	{
 		statusBar()->showMessage(QStringLiteral("将当前文章发送到 Kindle 设备"), 1);
 	});
+
+	connect(m_action_send_to_kindle, SIGNAL(triggered(bool)), this, SLOT(mail_to()));
 
 	connect(m_action_save_to_file, &QAction::hovered, this, [this]()
 	{
@@ -181,4 +183,31 @@ void NovelViewer::save_to()
 void NovelViewer::save_to_file(QString filename)
 {
 	m_tianya_download.save_to_file(filename);
+}
+
+void NovelViewer::mail_to()
+{
+	QSettings settings;
+	EmailAddress mail_rcpt(settings.value("kindle.kindlemail").toString().toUtf8().toStdString());
+
+	auto progress_bar = new QProgressBar(this);
+
+	statusBar()->addPermanentWidget(progress_bar);
+	progress_bar->setFormat(QStringLiteral("发送邮件... %p%"));
+
+	QObject::connect(&m_tianya_download, &tianya_download::mailsend_progress_report, progress_bar, [progress_bar, this](double v)
+	{
+		progress_bar->setValue(v * 100);
+	});
+
+	QObject::connect(&m_tianya_download, &tianya_download::send_complete, progress_bar, [progress_bar, this]()
+	{
+		progress_bar->setValue(100);
+
+		progress_bar->setFormat(QStringLiteral("发送完成"));
+
+		QTimer::singleShot(3000, progress_bar, SLOT(deleteLater()));
+	});
+
+	m_tianya_download.start_send_mail(mail_rcpt);
 }
