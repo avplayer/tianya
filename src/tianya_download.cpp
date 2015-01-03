@@ -1,8 +1,12 @@
 ﻿
+#include <memory>
+#include <functional>
+
 #include <boost/asio.hpp>
 #include <QTimer>
 #include <QtWidgets>
 #include <QFile>
+
 
 #include "syncobj.hpp"
 #include "tianya_download.hpp"
@@ -18,11 +22,14 @@ tianya_download::tianya_download(boost::asio::io_service& io, const list_info& i
 	auto is_gone = m_is_gone;
 	m_connection_notify_chunk = m_tianya_context->connect_one_content_fetched([this, is_gone](std::wstring content)
 	{
-		post_on_gui_thread([this, is_gone, content]()
+		double progressprecent = (double)m_tianya_context->page_index() / (double) m_tianya_context->page_count();
+		post_on_gui_thread([this, is_gone, content, progressprecent]()
 		{
 			if (*is_gone)
 				return;
 			chunk_download_notify(QString::fromStdWString(content));
+
+			download_progress_report(progressprecent);
 
 			if (m_first_chunk)
 			{

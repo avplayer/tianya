@@ -103,6 +103,22 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 	connect(m_action_save_to_file, SIGNAL(triggered(bool)), this, SLOT(save_to()));
 
 	statusBar()->showMessage(QStringLiteral("下载中..."));
+
+	m_progress_bar = new QProgressBar(this);
+
+	statusBar()->addPermanentWidget(m_progress_bar);
+	m_progress_bar->setMaximum(100);
+	m_progress_bar->setMinimum(0);
+
+	connect(&m_tianya_download, &tianya_download::download_progress_report, m_progress_bar, [this](double v){
+		m_progress_bar->setValue(v*100);
+	});
+
+	connect(&m_tianya_download, &tianya_download::download_complete, m_progress_bar, [this]()
+	{
+		m_progress_bar->setValue(100);
+		QTimer::singleShot(3000, m_progress_bar, SLOT(deleteLater()));
+	});
 }
 
 NovelViewer::~NovelViewer()

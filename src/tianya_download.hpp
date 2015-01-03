@@ -33,6 +33,8 @@ Q_SIGNALS:
 	void chunk_download_notify(QString);
 	void timed_first_timershot();
 
+	void download_progress_report(double);
+
 private:
 	boost::asio::io_service& m_io_service;
 	list_info m_list_info;

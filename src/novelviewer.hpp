@@ -8,6 +8,7 @@
 #include <QWidget>
 #include <QMainWindow>
 #include <QToolBar>
+#include <QProgressBar>
 
 #include <tianya_context.hpp>
 #include <tianya_list.hpp>
@@ -50,4 +51,5 @@ private:
 	QAction* m_action_send_to_kindkle;
     QAction* m_action_save_to_file;
     QToolBar* m_toolbar;
+    QProgressBar* m_progress_bar;
 };
