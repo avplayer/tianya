@@ -32,6 +32,9 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 	m_action_send_to_kindkle = menuBar()->addAction(QStringLiteral("发送到 kindle(&K)"));
 	m_action_save_to_file = menuBar()->addAction(QStringLiteral("保存文件(&S)"));
 
+	m_action_save_to_file->setShortcut(QKeySequence("Ctrl+S"));
+
+
 	connect(m_action_send_to_kindkle, &QAction::hovered, this, [this]()
 	{
 		statusBar()->showMessage(QStringLiteral("将当前文章发送到 Kindle 设备"));
