@@ -200,9 +200,8 @@ protected:
 		// header读取.
 		std::istream response_stream(&m_response);
 		std::string header;
-		while (std::getline(response_stream, header) && header != "\r")
-			std::cout << header << "\n";
-		std::cout << "\n";
+		while (std::getline(response_stream, header) && header != "\r");
+		std::cout << "Downloading page: " << m_page_index + 1 << std::endl;
 
 		std::string html_page_chareset = "utf-8";
 
@@ -264,6 +263,8 @@ protected:
 						int ret = std::swscanf(html_line.c_str(), L"pageCount : %d,", &m_page_count);
 						if (ret != 1)
 							std::cerr << "parser pageCount failed!" << std::endl;
+						else
+							std::cout << "Page count is: " << m_page_count << std::endl;
 					}
 				}
 
