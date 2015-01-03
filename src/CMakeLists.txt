@@ -4,6 +4,8 @@ set(CMAKE_AUTOMOC ON)
 cmake_policy(SET CMP0020 NEW)
 add_definitions(-DQT_NO_KEYWORDS)
 
+add_subdirectory(smtpclient/)
+
 configure_file(tianya.rc.in ${CMAKE_CURRENT_BINARY_DIR}/tianya.rc)
 
 file(GLOB SRCS *.cpp *.h*)

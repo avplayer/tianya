@@ -64,6 +64,7 @@ endif(MSVC)
 find_package(Threads)
 find_package(Qt5Widgets REQUIRED)
 find_package(Boost REQUIRED COMPONENTS regex thread system locale context coroutine)
+find_package(Qt5Network REQUIRED)
 
 if(MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LIBPATH:${Boost_LIBRARY_DIR}")
