@@ -33,8 +33,8 @@ int main(int argc, char** argv)
 
 	io.run();
 
+	// 输出到文件.
 	std::string name = time_to_string(aux::gettime()) + ".txt";
-
 	obj->serialize_to_file(name);
 
 	return 0;
