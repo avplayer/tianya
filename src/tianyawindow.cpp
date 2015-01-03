@@ -11,6 +11,7 @@
 #include "syncobj.hpp"
 #include "kindlesettingdialog.hpp"
 #include "novelviewer.hpp"
+#include "sendprogress.hpp"
 
 TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	: QMainWindow(parent)
@@ -191,6 +192,11 @@ void TianyaWindow::pop_up_context_menu(QPoint pos)
 				list_info info = qvariant_cast<list_info>(post_url_var);
 
 				// TODO 构造 tianyadownload 对象, 下载 TXT 然后以邮件附件形式发送到 kindle 里.
+
+				auto send_progress = new SendProgress(m_io_service, info);
+				send_progress->setAttribute(Qt::WA_DeleteOnClose);
+				send_progress->show();
+				send_progress->start();
 			}
 		}
 

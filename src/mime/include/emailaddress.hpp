@@ -16,16 +16,12 @@
   See the LICENSE file for more details.
 */
 
-#ifndef EMAILADDRESS_H
-#define EMAILADDRESS_H
+#pragma once
 
-#include <QObject>
+#include <QString>
 
-#include "smtpexports.hpp"
-
-class SMTP_EXPORT EmailAddress : public QObject
+class EmailAddress
 {
-    Q_OBJECT
 public:
 
     /* [1] Constructors and Destructors */
@@ -58,4 +54,3 @@ private:
     /* [3] --- */
 };
 
-#endif // EMAILADDRESS_H

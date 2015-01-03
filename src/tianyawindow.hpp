@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿
+#pragma once
 
 #include <string>
 #include <boost/asio/io_service.hpp>

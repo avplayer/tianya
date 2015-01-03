@@ -7,6 +7,7 @@
 #include <QtWidgets>
 #include <QFile>
 
+#include "mimemessage.hpp"
 
 #include "syncobj.hpp"
 #include "tianya_download.hpp"
@@ -72,7 +73,7 @@ tianya_download::~tianya_download()
 	m_tianya_context->stop();
 }
 
-void tianya_download::start()
+void tianya_download::start_download()
 {
 	m_tianya_context->start(m_list_info.post_url);
 }
@@ -95,5 +96,12 @@ void tianya_download::save_to_file(QString filename)
 			_tianya_context->serialize_to_io_device(filestream.get());
 		});
 	}
+}
+
+void tianya_download::start_send_mail(EmailAddress target)
+{
+	
+
+
 }
 

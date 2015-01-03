@@ -69,7 +69,7 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 
 	connect(&m_tianya_download, SIGNAL(download_complete()), this, SLOT(download_complete()));
 
-	m_tianya_download.start();
+	m_tianya_download.start_download();
 
 	m_action_send_to_kindkle = m_toolbar->addAction(QStringLiteral("发送到 kindle(&K)"));
 	m_action_send_to_kindkle->setShortcuts({QKeySequence("Ctrl+K"), QKeySequence("Alt+K")});
