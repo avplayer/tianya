@@ -1,6 +1,8 @@
 ﻿
 #include <boost/asio.hpp>
 #include <QTimer>
+#include <QtWidgets>
+#include <QFile>
 
 #include "syncobj.hpp"
 #include "tianya_download.hpp"
@@ -48,3 +50,24 @@ void tianya_download::start()
 {
 	m_tianya_context->start(m_list_info.post_url);
 }
+
+void tianya_download::save_to_file(QString filename)
+{
+	std::shared_ptr<QFile> filestream = std::make_shared<QFile>(filename);
+
+	filestream->open(QFile::WriteOnly);
+
+	if (filestream->isOpen())
+	{
+		// add BOM
+		filestream->write("\357\273\277", 3);
+
+		auto _tianya_context = m_tianya_context;
+
+		m_io_service.post([this, filestream, _tianya_context]()
+		{
+			_tianya_context->serialize_to_io_device(filestream.get());
+		});
+	}
+}
+

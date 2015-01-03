@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿
+#pragma once
 
 #include <QObject>
 #include <boost/asio/io_service.hpp>
@@ -18,6 +19,8 @@ public:
 
 public Q_SLOTS:
 	void start();
+
+	void save_to_file(QString);
 
 Q_SIGNALS:
 	void download_complete();

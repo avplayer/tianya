@@ -140,6 +140,16 @@ public:
 		}
 	}
 
+	template<class IODevice>
+	void serialize_to_io_device(IODevice* io)
+	{
+		for (auto& item : m_context_info.context)
+		{
+			std::string line = wide_utf8(item);
+			io->write(line.c_str(), line.size());
+		}
+	}
+
 protected:
 
 	bool process_handle(boost::asio::yield_context& yield, const url_info& ui)

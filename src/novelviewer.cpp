@@ -99,19 +99,5 @@ void NovelViewer::save_to()
 
 void NovelViewer::save_to_file(QString filename)
 {
-	std::shared_ptr<std::ofstream> filestream = std::make_shared<std::ofstream>();
-
-	filestream->open(filename.toUtf8().data(), std::ofstream::out);
-	if (filestream->is_open())
-	{
-		// add BOM
-		filestream->write("\357\273\277", 3);
-
-		auto _tianya_context = m_tianya_download.get_tianya_context();
-
-		m_io_service.post([this, filestream, _tianya_context]()
-		{
-			_tianya_context->serialize_to_stream(filestream.get());
-		});
-	}
+	m_tianya_download.save_to_file(filename);
 }
