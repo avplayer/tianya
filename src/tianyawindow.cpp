@@ -25,6 +25,7 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	m_sortproxy_for_tianya_data_mode.setSourceModel(&m_tianya_data_mode);
 	m_sortproxy_for_tianya_data_mode.setFilterRole(Qt::UserRole+3);
 	m_sortproxy_for_tianya_data_mode.setFilterKeyColumn(-1);
+	m_sortproxy_for_tianya_data_mode.setFilterCaseSensitivity(Qt::CaseInsensitive);
 
 	// 设置 modle !
 	ui.tableView->setModel(&m_sortproxy_for_tianya_data_mode);
