@@ -113,13 +113,13 @@ void tianya_download::start_send_mail(EmailAddress mail_rcpt)
 
 	imf.header["from"] = mail_sender.getAddress();
 	imf.header["to"] = mail_rcpt.getAddress();
-	imf.header["subject"] = "[convert]";
+	imf.header["subject"] = "Convert";
 
 	std::shared_ptr<MimeMessage> message = std::make_shared<MimeMessage>();
 
 	message->setSender(mail_sender);
 	message->addRecipient(mail_rcpt);
-    message->setSubject("[convert]");
+    message->setSubject("Convert");
 
 	auto text_part = std::make_shared<MimeText>();
     text_part->setText("Hi!\n This is an email with some attachments.");
