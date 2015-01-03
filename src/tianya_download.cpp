@@ -7,17 +7,21 @@
 #include "syncobj.hpp"
 #include "tianya_download.hpp"
 
-tianya_download::tianya_download(boost::asio::io_service& io, const list_info& info, QObject* parent)
+tianya_download::tianya_download(boost::asio::io_service& io, const list_info& info, bool filter_reply, QObject* parent)
 	: QObject(parent)
 	, m_io_service(io)
 	, m_tianya_context(std::make_shared<tianya_context>(std::ref(io)))
 	, m_list_info(info)
 	, m_first_chunk(true)
+	, m_is_gone(std::make_shared<bool>(false))
 {
-	m_connection_notify_chunk = m_tianya_context->connect_one_content_fetched([this](std::wstring content)
+	auto is_gone = m_is_gone;
+	m_connection_notify_chunk = m_tianya_context->connect_one_content_fetched([this, is_gone](std::wstring content)
 	{
-		post_on_gui_thread([this, content]()
+		post_on_gui_thread([this, is_gone, content]()
 		{
+			if (*is_gone)
+				return;
 			chunk_download_notify(QString::fromStdWString(content));
 
 			if (m_first_chunk)
@@ -29,17 +33,32 @@ tianya_download::tianya_download(boost::asio::io_service& io, const list_info& i
 		});
 	});
 
-	m_connection_notify_complete = m_tianya_context->connect_download_complete([this]()
+	m_connection_notify_complete = m_tianya_context->connect_download_complete([this, is_gone]()
 	{
-		post_on_gui_thread([this]()
+		post_on_gui_thread([this, is_gone]()
 		{
+			if (*is_gone)
+				return;
 			download_complete();
 		});
 	});
+
+	m_tianya_context->filter_reply(filter_reply);
+}
+
+bool tianya_download::filter_reply()
+{
+	return m_tianya_context->filter_reply();
+}
+
+void tianya_download::set_filter_reply(bool v)
+{
+	m_tianya_context->filter_reply(v);
 }
 
 tianya_download::~tianya_download()
 {
+	*m_is_gone = true;
 	m_connection_notify_complete.disconnect();
 	m_connection_notify_chunk.disconnect();
 
@@ -64,7 +83,7 @@ void tianya_download::save_to_file(QString filename)
 
 		auto _tianya_context = m_tianya_context;
 
-		m_io_service.post([this, filestream, _tianya_context]()
+		m_io_service.post([filestream, _tianya_context]()
 		{
 			_tianya_context->serialize_to_io_device(filestream.get());
 		});
