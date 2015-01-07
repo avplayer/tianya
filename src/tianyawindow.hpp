@@ -7,9 +7,9 @@
 #include <QtWidgets>
 
 #include <tianya_list.hpp>
-#include "tianyamodel.hpp"
-#include "ui_tianyawindow.h"
+#include "model/tianyamodel.hpp"
 
+#include "ui_tianyawindow.h"
 
 class TianyaWindow : public QMainWindow
 {

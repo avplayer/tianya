@@ -137,3 +137,8 @@ int TianyaModel::rowCount(const QModelIndex& parent) const
 
 	return size;
 }
+
+QModelIndex TianyaModel::index(int row, int column, const QModelIndex& parent) const
+{
+    return  createIndex(row, column);
+}
