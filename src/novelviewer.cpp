@@ -41,6 +41,7 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 	: QMainWindow(parent)
 	, m_io_service(io)
 	, m_tianya_download(io, info, true)
+	, m_esc(QKeySequence("ESC"), this, SLOT(hidefind_widget()))
 {
 	ui.setupUi(this);
 
@@ -80,6 +81,9 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 
 	m_toolbar->addSeparator();
 
+	auto find_action = m_toolbar->addAction(QStringLiteral("查找(&F)"));
+	find_action->setShortcut(QKeySequence("Ctrl+F"));
+
 	auto cbox = new QCheckBox(QStringLiteral("过滤楼主回复贴(&R)"));
 	//auto cbox = m_toolbar->addAction(QStringLiteral("过滤楼主回复贴(&R)"));
 
@@ -104,6 +108,8 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 
 	connect(m_action_save_to_file, SIGNAL(triggered(bool)), this, SLOT(save_to()));
 
+	connect(find_action, SIGNAL(triggered(bool)), this, SLOT(showfind_widget()));
+
 	statusBar()->showMessage(QStringLiteral("下载中..."));
 
 	m_progress_bar = new QProgressBar(this);
@@ -121,6 +127,13 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 		m_progress_bar->setValue(100);
 		QTimer::singleShot(3000, m_progress_bar, SLOT(deleteLater()));
 	});
+
+
+	textBrowser_layout = new QVBoxLayout();
+	textBrowser_layout->setDirection(QBoxLayout::BottomToTop);
+	ui.textBrowser->setLayout(textBrowser_layout);
+	textBrowser_layout->addSpacing(15);
+	textBrowser_layout->addStretch();
 }
 
 NovelViewer::~NovelViewer()
@@ -152,6 +165,8 @@ void NovelViewer::changeEvent(QEvent *e)
 
 void NovelViewer::text_brower_stay_on_top()
 {
+	ui.textBrowser->moveCursor(QTextCursor::Start);
+
 	ui.textBrowser->verticalScrollBar()->setValue(0);
 }
 
@@ -210,4 +225,45 @@ void NovelViewer::mail_to()
 	});
 
 	m_tianya_download.start_send_mail(mail_rcpt);
+}
+
+void NovelViewer::showfind_widget()
+{
+	if (findwindow)
+		return findwindow->show();
+
+	findwindow = new QWidget(ui.textBrowser);
+
+	textBrowser_layout->insertWidget(1, findwindow);
+
+	auto findwindow_layout = new QHBoxLayout(findwindow);
+
+	auto edit = new QLineEdit(findwindow);
+
+	findwindow_layout->addWidget(edit);
+	findwindow_layout->addSpacing(50);
+
+	findwindow->show();
+
+	connect(edit,&QLineEdit::textChanged, ui.textBrowser, [this](QString text)
+	{
+		ui.textBrowser->find(text);
+	});
+
+	connect(edit,&QLineEdit::editingFinished, findwindow, [this, edit]()
+	{
+		QString text = edit->displayText();
+		ui.textBrowser->find(text);
+	});
+
+	edit->setFocus();
+}
+
+void NovelViewer::hidefind_widget()
+{
+	if (findwindow)
+	{
+		findwindow->deleteLater();
+		findwindow = nullptr;
+	}
 }
