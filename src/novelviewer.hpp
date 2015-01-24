@@ -50,7 +50,7 @@ private Q_SLOTS:
 private:
 	Ui::NovelViewer ui;
 
-	QShortcut m_esc;
+	QShortcut m_esc, temp_shortcut;
 
 	boost::asio::io_service& m_io_service;
 	std::wstring m_title;

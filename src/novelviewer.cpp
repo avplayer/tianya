@@ -42,6 +42,7 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 	, m_io_service(io)
 	, m_tianya_download(io, info, true)
 	, m_esc(QKeySequence("ESC"), this, SLOT(hidefind_widget()))
+	, temp_shortcut(QKeySequence("/"), this, SLOT(showfind_widget()))
 {
 	ui.setupUi(this);
 
@@ -127,7 +128,6 @@ NovelViewer::NovelViewer(boost::asio::io_service& io, list_info info, QWidget *p
 		m_progress_bar->setValue(100);
 		QTimer::singleShot(3000, m_progress_bar, SLOT(deleteLater()));
 	});
-
 
 	textBrowser_layout = new QVBoxLayout();
 	textBrowser_layout->setDirection(QBoxLayout::BottomToTop);
@@ -230,7 +230,12 @@ void NovelViewer::mail_to()
 void NovelViewer::showfind_widget()
 {
 	if (findwindow)
-		return findwindow->show();
+	{
+		findwindow->show();
+		return findwindow->setFocus();
+	}
+
+	temp_shortcut.setEnabled(false);
 
 	findwindow = new QWidget(ui.textBrowser);
 
@@ -266,4 +271,6 @@ void NovelViewer::hidefind_widget()
 		findwindow->deleteLater();
 		findwindow = nullptr;
 	}
+
+	temp_shortcut.setEnabled(true);
 }
