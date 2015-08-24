@@ -100,10 +100,14 @@ Q_IMPORT_PLUGIN(QICOPlugin);
 #pragma comment(lib, "Qt5PlatformSupportd.lib")
 #pragma comment(lib, "qwindowsd.lib")
 #pragma comment(lib, "qicod.lib")
+#pragma comment(lib, "qtfreetyped.lib")
+#pragma comment(lib, "qtpcred.lib")
 #else
 #pragma comment(lib, "Qt5PlatformSupport.lib")
 #pragma comment(lib, "qwindows.lib")
 #pragma comment(lib, "qico.lib")
+#pragma comment(lib, "qtfreetype.lib")
+#pragma comment(lib, "qtpcre.lib")
 #endif
 
 #pragma comment(lib, "opengl32.lib")

@@ -113,5 +113,7 @@ endif()
 
 include_directories(libtianya/include)
 
+link_directories(${Boost_LIBRARY_DIR} ${QT_LIB_DIR})
+
 add_subdirectory(src)
 
