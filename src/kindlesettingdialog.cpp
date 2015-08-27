@@ -6,6 +6,10 @@ KindleSettingDialog::KindleSettingDialog(QWidget *parent)
 	ui.setupUi(this);
 }
 
+KindleSettingDialog::~KindleSettingDialog()
+{
+}
+
 void KindleSettingDialog::changeEvent(QEvent *e)
 {
 	QDialog::changeEvent(e);

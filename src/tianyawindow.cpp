@@ -11,6 +11,7 @@
 #include "syncobj.hpp"
 #include "kindlesettingdialog.hpp"
 #include "novelviewer.hpp"
+#include "sendprogress.hpp"
 
 TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 	: QMainWindow(parent)
@@ -22,9 +23,10 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 
 	m_post_url = "http://bbs.tianya.cn/list.jsp?item=culture&grade=1&order=1";
 
-	m_sortproxy_for_tianya_data_mode.setSourceModel(&m_tianya_data_mode);
+ 	m_sortproxy_for_tianya_data_mode.setSourceModel(&m_tianya_data_mode);
 	m_sortproxy_for_tianya_data_mode.setFilterRole(Qt::UserRole+3);
 	m_sortproxy_for_tianya_data_mode.setFilterKeyColumn(-1);
+	m_sortproxy_for_tianya_data_mode.setFilterCaseSensitivity(Qt::CaseInsensitive);
 
 	// 设置 modle !
 	ui.tableView->setModel(&m_sortproxy_for_tianya_data_mode);
@@ -45,6 +47,14 @@ TianyaWindow::TianyaWindow(boost::asio::io_service& io, QWidget *parent)
 
 	auto qsetkindke_button = new QPushButton(QStringLiteral("设置Kindle邮箱"), menuWidget());
 	hbox->addWidget(qsetkindke_button);
+
+	auto tianya = new QCheckBox(QStringLiteral("天涯"));
+	hbox->addWidget(tianya);
+	tianya->setChecked(true);
+	tianya->setDisabled(true);
+
+	hbox->addWidget(new QCheckBox(QStringLiteral("起点")));
+
 
 	hbox->addWidget(new QFrame(menuWidget()));
 
@@ -182,6 +192,11 @@ void TianyaWindow::pop_up_context_menu(QPoint pos)
 				list_info info = qvariant_cast<list_info>(post_url_var);
 
 				// TODO 构造 tianyadownload 对象, 下载 TXT 然后以邮件附件形式发送到 kindle 里.
+
+				auto send_progress = new SendProgress(m_io_service, info);
+				send_progress->setAttribute(Qt::WA_DeleteOnClose);
+				send_progress->show();
+				send_progress->start();
 			}
 		}
 

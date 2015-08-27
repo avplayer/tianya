@@ -272,16 +272,20 @@ protected:
 			break;
 			case state_name:
 			{
-				std::string::size_type pos = 0;
-				boost::replace_all(html_line, L"<font color=#ff0000>", L"");
-				boost::replace_all(html_line, L"<font color=red>", L"");
-				boost::replace_all(html_line, L"<font color=green>", L"");
-				boost::replace_all(html_line, L"<font color=#BF3EFF>", L"");
-				boost::replace_all(html_line, L"</font>", L"");
-				boost::replace_all(html_line, L"</span>", L"");
-				boost::replace_all(html_line, L"<span class=title_red>", L"");
-				if ((pos = html_line.find(L"<span")) != std::wstring::npos)
-					html_line = html_line.substr(0, pos);
+				while (true)
+				{
+					boost::wsmatch what;
+					boost::wregex ex(L"</{0,1}(font|span|strong)(.*?)>");
+					if (boost::regex_search(html_line, what, ex))
+					{
+						std::wstring str = what.str();
+						boost::replace_all(html_line, str, L"");
+					}
+					else
+					{
+						break;
+					}
+				}
 				boost::trim(html_line);
 				if (html_line.find(L"</a") != std::string::npos)
 				{

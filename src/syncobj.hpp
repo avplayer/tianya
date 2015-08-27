@@ -21,6 +21,7 @@ Q_SIGNALS:
 
 public:
 	SyncObjec();
+	virtual ~SyncObjec(){}
 
 	friend void post_on_gui_thread(std::function<void()>);
 

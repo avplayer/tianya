@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿
+#pragma once
 
 #include <string>
 #include <boost/asio/io_service.hpp>
@@ -6,9 +7,9 @@
 #include <QtWidgets>
 
 #include <tianya_list.hpp>
-#include "tianyamodel.hpp"
-#include "ui_tianyawindow.h"
+#include "model/tianyamodel.hpp"
 
+#include "ui_tianyawindow.h"
 
 class TianyaWindow : public QMainWindow
 {
@@ -16,7 +17,7 @@ class TianyaWindow : public QMainWindow
 
 public:
 	explicit TianyaWindow(boost::asio::io_service& , QWidget* parent = 0);
-	~TianyaWindow();
+	virtual ~TianyaWindow();
 
 protected:
 	virtual void changeEvent(QEvent *e) Q_DECL_OVERRIDE;

@@ -7,10 +7,12 @@
 
 #pragma once
 
+#include <algorithm>
 #include <memory>
 #include <functional>
 #include <atomic>
 
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/asio/spawn.hpp>
@@ -30,15 +32,8 @@ struct context_info
 	std::string last_url;
 	int hits;
 	int replys;
-// 	struct item
-// 	{
-// 		std::wstring context;
-// 		std::wstring time;
-// 	};
 	std::vector<std::wstring> context;
 };
-
-namespace impl{
 
 class tianya_context : public std::enable_shared_from_this<tianya_context>
 {
@@ -47,6 +42,9 @@ public:
 		: m_io_service(io)
 		, m_socket(io)
 		, m_resolver(io)
+		, m_page_index(0)
+		, m_page_count(-1)
+		, m_filter_reply(false)
 		, m_abort(false)
 	{}
 
@@ -79,7 +77,8 @@ public:
 						boost::asio::spawn(m_io_service,
 						[this, self, ui](boost::asio::yield_context yield)
 						{
-							process_handle(yield, ui);
+							if (!process_handle(yield, ui))
+								m_download_complete();
 						});
 					}
 				});
@@ -94,10 +93,36 @@ public:
 		m_socket.close(ignore_ec);
 	}
 
-	template <class T>
-	void connect_one_content_fetched(T&& t)
+	void filter_reply(bool filter)
 	{
-		m_one_content_fetched.connect(t);
+		m_filter_reply = filter;
+	}
+
+	bool filter_reply() const
+	{
+		return m_filter_reply;
+	}
+
+	int page_count() const
+	{
+		return m_page_count;
+	}
+
+	int page_index() const
+	{
+		return m_page_index;
+	}
+
+	template <class T>
+	boost::signals2::connection connect_one_content_fetched(T&& t)
+	{
+		return m_one_content_fetched.connect(t);
+	}
+
+	template <class T>
+	boost::signals2::connection connect_download_complete(T&& t)
+	{
+		return m_download_complete.connect(t);
 	}
 
 	// 存文件.
@@ -108,20 +133,38 @@ public:
 		if (!fp)
 			return;
 
-		// UTF-16 big endian with BOM.
-		std::fwrite("\xfe\xff", 2, 1, fp.get());
+		// UTF-8 big endian with BOM.
+		std::fwrite("\xEF\xBB\xBF", 3, 1, fp.get());
 
 		for (auto& item : m_context_info.context)
 		{
 			const std::wstring& buffer = item;
-			std::fwrite(buffer.c_str(), buffer.size(), 1, fp.get());
-			// std::fputws(buffer.c_str(), fp.get());
+			std::string utf8 = wide_utf8(buffer);
+			std::fwrite(utf8.c_str(), utf8.size(), 1, fp.get());
+		}
+	}
+
+	void serialize_to_stream(std::ostream* ostream)
+	{
+		for (auto& item : m_context_info.context)
+		{
+			*ostream << wide_utf8(item);
+		}
+	}
+
+	template<class IODevice>
+	void serialize_to_io_device(IODevice* io)
+	{
+		for (auto& item : m_context_info.context)
+		{
+			std::string line = wide_utf8(item);
+			io->write(line.c_str(), line.size());
 		}
 	}
 
 protected:
 
-	void process_handle(boost::asio::yield_context& yield, const url_info& ui)
+	bool process_handle(boost::asio::yield_context& yield, const url_info& ui)
 	{
 		boost::system::error_code ec;
 		m_request.consume(m_request.size());
@@ -142,7 +185,7 @@ protected:
 		if (ec)
 		{
 			m_socket.close(ec);
-			return;
+			return false;
 		}
 
 		std::size_t bytes_transferred = 0;
@@ -151,15 +194,14 @@ protected:
 		if (ec)
 		{
 			m_socket.close(ec);
-			return;
+			return false;
 		}
 
 		// header读取.
 		std::istream response_stream(&m_response);
 		std::string header;
-		while (std::getline(response_stream, header) && header != "\r")
-			std::cout << header << "\n";
-		std::cout << "\n";
+		while (std::getline(response_stream, header) && header != "\r");
+		std::cout << "Downloading page: " << m_page_index + 1 << std::endl;
 
 		std::string html_page_chareset = "utf-8";
 
@@ -170,7 +212,7 @@ protected:
 			if (ec)
 			{
 				m_socket.close(ec);
-				return;
+				return false;
 			}
 
 			// 取出response的数据到message.
@@ -207,10 +249,23 @@ protected:
 					}
 				}
 
-				if (html_line.find(L"<div class=\"bbs-content\"") != std::string::npos)
+				if (html_line.find(L"<div class=\"bbs-content") != std::wstring::npos)
 				{
 					m_context.clear();
 					m_state = state_div_bbs_content;
+				}
+
+				if (m_page_count == -1)
+				{
+					if (html_line.find(L"pageCount :") != std::wstring::npos)
+					{
+						boost::trim(html_line);
+						int ret = std::swscanf(html_line.c_str(), L"pageCount : %d,", &m_page_count);
+						if (ret != 1)
+							std::cerr << "parser pageCount failed!" << std::endl;
+						else
+							std::cout << "Page count is: " << m_page_count << std::endl;
+					}
 				}
 
 				if (html_line.find(L"下页") != std::wstring::npos)
@@ -230,20 +285,19 @@ protected:
 								html_line = html_line.substr(0, pos);
 								boost::trim(html_line);
 								m_next_page_url = wide_utf8(L"http://bbs.tianya.cn" + html_line);
+								m_page_index++;
 								start(m_next_page_url);
 								m_next_page_url = "";
-								return;
+								return true;
 							}
 						}
-
-						m_download_complete();
 					}
 				}
 			}
 			break;
 			case state_div_bbs_content:
 			{
-				if (html_line.find(L"</div>") != std::string::npos)
+				if (html_line.find(L"</div>") != std::wstring::npos)
 				{
 					m_state = state_author;
 					break;
@@ -261,6 +315,10 @@ protected:
 					{
 						std::wstring author = what[1];
 						boost::trim(author);
+						if (m_filter_reply)
+						{
+							m_users.insert(author);
+						}
 						if (author == m_context_info.author)
 						{
 							ex.assign(L"replytime=\"(.*?)\"");
@@ -269,7 +327,61 @@ protected:
 								std::wstring reply_time = what[1];
 								boost::trim(m_context);
 								boost::replace_all(m_context, L"<br>", L"\n");
-								m_context_info.context.push_back(m_context);
+								bool filter = false;
+								if (m_filter_reply)
+								{
+									if (m_context.find(L"——————————————————————") != std::wstring::npos)
+									{
+										filter = true;
+									}
+									else
+									{
+										if (m_context.find(L"：") != std::wstring::npos || m_context.find(L"@") != std::wstring::npos)
+										{
+											std::for_each(m_users.begin(), m_users.end(),
+											[this, &filter](const std::wstring& s)
+											{
+												std::wstring test = L"@" + s;
+												if (m_context.find(test) != std::wstring::npos)
+												{
+													filter = true;
+												}
+												else
+												{
+													test = L"作者：" + s;
+													if (m_context.find(test) != std::wstring::npos)
+													{
+														filter = true;
+													}
+													else
+													{
+														test = s + L"：";
+														if (m_context.find(test) != std::wstring::npos)
+															filter = true;
+													}
+												}
+											});
+										}
+									}
+								}
+								if (!filter)
+								{
+									while (true)
+									{
+										boost::wsmatch what;
+										boost::wregex ex(L"</{0,1}(font|span|strong)(.*?)>");
+										if (boost::regex_search(m_context, what, ex))
+										{
+											std::wstring str = what.str();
+											boost::replace_all(m_context, str, L"");
+										}
+										else
+										{
+											break;
+										}
+									}
+									m_context_info.context.push_back(m_context);
+								}
 								m_one_content_fetched(m_context);
 							}
 						}
@@ -281,6 +393,7 @@ protected:
 			break;
 			}
 		}
+		return false;
 	}
 
 private:
@@ -293,49 +406,18 @@ private:
 	std::wstring m_context;
 	std::string m_post_url;
 	std::string m_next_page_url;
-
+	int m_page_index;
+	int m_page_count;
+	bool m_filter_reply;
+	std::set<std::wstring> m_users;
 	// 完全下载完成后发射这个信号.
 	boost::signals2::signal<void()> m_download_complete;
 	// 每获取到一帖发射这个信号.
 	boost::signals2::signal<void(std::wstring)> m_one_content_fetched;
-
 	enum {
 		state_unkown,			//
 		state_div_bbs_content,	// <div class="bbs-content
 		state_author			// <a href="javascript:void(0);" class="reportme a-link" replyid="0" replytime="2010-05-16 22:22:13" author="害我心跳180" authorId="20558716">举报</a> |
 	} m_state;
-	std::atomic<bool> m_abort;
-};
-
-} // namespace impl
-
-class tianya_context : boost::noncopyable
-{
-public:
-	tianya_context(boost::asio::io_service& io)
-	{
-		m_impl = std::make_shared<impl::tianya_context>(std::ref(io));
-	}
-
-	~tianya_context()
-	{
-		m_impl->stop();
-	}
-
-	void start(std::string url)
-	{
-		m_impl->start(url);
-	}
-
-	void stop()
-	{
-		m_impl->stop();
-	}
-
-	template <class T>
-	void connect_one_content_fetched(T&& t)
-	{
-		m_impl->connect_one_content_fetched(t);
-	}
-	std::shared_ptr<impl::tianya_context> m_impl;
+	bool m_abort;
 };
