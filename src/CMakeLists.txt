@@ -25,11 +25,7 @@ target_link_libraries(tianya mailmime smtpclient Qt5::Widgets)
 
 # target_link_libraries(tianya OPENS)
 
-if(NOT MSVC)
-target_link_libraries(tianya  ${Boost_LIBRARIES})
-endif()
-
-target_link_libraries(tianya ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(tianya  ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 	target_link_libraries(tianya ${Qt5StaticExtra})
