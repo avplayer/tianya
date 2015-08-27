@@ -262,6 +262,7 @@ protected:
 						html_line = html_line.substr(0, pos);
 						boost::trim(html_line);
 						m_info.post_url = wide_utf8(L"http://bbs.tianya.cn" + html_line);
+						m_info.title.clear();
 						m_state = state_name;
 						break;
 					}
@@ -282,8 +283,13 @@ protected:
 				if ((pos = html_line.find(L"<span")) != std::wstring::npos)
 					html_line = html_line.substr(0, pos);
 				boost::trim(html_line);
-				m_info.title = html_line;
-				m_state = state_skip4;
+				if (html_line.find(L"</a") != std::string::npos)
+				{
+					m_state = state_skip5;
+					boost::trim_if(m_info.title, boost::is_any_of(" \t\r"));
+					break;
+				}
+				m_info.title += html_line;
 			}
 			break;
 			case state_skip4:
