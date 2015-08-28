@@ -43,12 +43,13 @@ void tianya_list::process_handle(boost::asio::yield_context& yield, const url_in
 
 	std::string html_page_chareset = "utf-8";
 
+	int yield_time = 0;
 	// 循环读取数据.
 	while (!m_abort)
 	{
 		bytes_transferred = boost::asio::async_read_until(m_socket, m_response, "\n", yield[ec]);
 #ifdef _WIN32
-		Sleep(0);
+		Sleep(yield_time);
 #endif
 		if (ec)
 		{
@@ -71,11 +72,19 @@ void tianya_list::process_handle(boost::asio::yield_context& yield, const url_in
 		{
 		case state_unkown:
 		{
+			yield_time = 0;
+	
 			if (html_line.find(L"meta charset=") != std::wstring::npos)
+			{
 				html_page_chareset = detail::get_chareset(raw_html_line); // 获取真正的编码.
+				break;
+			}
 
 			if (html_line.find(L"<td class=\"td-title facered\">") != std::string::npos)
+			{
+				yield_time = 1;
 				m_state = state_found;
+			}
 
 			if (html_line.find(L"下一页") != std::string::npos)
 			{
@@ -153,7 +162,7 @@ void tianya_list::process_handle(boost::asio::yield_context& yield, const url_in
 				boost::trim_if(m_info.title, boost::is_any_of(" \t\r"));
 				break;
 			}
-			m_info.title += html_line;
+			m_info.title += std::move(html_line);
 		}
 		break;
 		case state_skip4:
@@ -176,7 +185,7 @@ void tianya_list::process_handle(boost::asio::yield_context& yield, const url_in
 					html_line = html_line.substr(pos + 1);
 			}
 			boost::trim(html_line);
-			m_info.author = html_line;
+			m_info.author = std::move(html_line);
 			m_state = state_hits;
 		}
 		break;
@@ -218,13 +227,13 @@ void tianya_list::process_handle(boost::asio::yield_context& yield, const url_in
 					html_line = html_line.substr(pos + 1);
 			}
 			boost::trim(html_line);
-			m_info.post_time = html_line;
+			m_info.post_time = std::move(html_line);
 			m_hits.insert(std::make_pair(m_info.hits, m_info));
 			m_replys.insert(std::make_pair(m_info.replys, m_info));
 
 			// 发射信号告诉上层 m_hits 改变了.
 			m_sig_hit_item_fetched(boost::ref(m_info));
-
+			yield_time = 2;
 			m_state = state_unkown;
 		}
 		break;
