@@ -21,7 +21,7 @@ add_executable(tianya WIN32 ${SRCS} dpi.manifest  ${CMAKE_CURRENT_BINARY_DIR}/ti
 
 target_include_directories(tianya PUBLIC ${Boost_INCLUDE_DIRS})
 
-target_link_libraries(tianya mailmime smtpclient Qt5::Widgets)
+target_link_libraries(tianya libtianya mailmime smtpclient Qt5::Widgets)
 
 # target_link_libraries(tianya OPENS)
 

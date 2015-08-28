@@ -138,10 +138,11 @@ if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 	link_libraries(${Qt5Platform_LIBRARIES} ${Qt5QWindows_LIBRARIES} ${Qt5QICO_LIBRARIES} ${Qt5HB_LIBRARIES} ${Qt5FT_LIBRARIES} ${Qt5PCRE_LIBRARIES})
 endif()
 
+add_subdirectory(libtianya)
+
 include_directories(libtianya/include)
 include_directories(avboost/include)
 
 link_directories(${QT_LIB_DIR})
-
 add_subdirectory(src)
 

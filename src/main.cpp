@@ -16,6 +16,10 @@ public:
 		m_asio_thread = std::thread([this]()
 		{
 			m_work.reset(new boost::asio::io_service::work(m_asio));
+#ifdef _WIN32
+			auto ret = ::SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
+			BOOST_ASSERT(ret);
+#endif
 			m_asio.run();
 		});
 

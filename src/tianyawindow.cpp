@@ -90,7 +90,7 @@ void TianyaWindow::closeEvent(QCloseEvent*e)
 
 void TianyaWindow::real_start_tianya()
 {
-	m_tianya.connect_hit_item_fetched([this](list_info hits_info)
+	m_tianya.connect_hit_item_fetched([this](const list_info& hits_info)
 	{
 		post_on_gui_thread([this, hits_info]()
 		{
