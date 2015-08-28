@@ -75,6 +75,7 @@ find_package(Boost REQUIRED COMPONENTS regex thread system locale context corout
 include_directories(${OPENSSL_INCLUDE_DIR})
 link_libraries(${OPENSSL_LIBRARIES})
 link_directories(${Boost_LIBRARY_DIR})
+include_directories(${Boost_INCLUDE_DIR})
 
 if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 	# For static Windows builds, we also need to pull in the Qt5 Platform
