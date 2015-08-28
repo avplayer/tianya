@@ -54,8 +54,8 @@ endforeach()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj /MP")
 
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}  /ignore:4099 /NODEFAULTLIB:libcmt.lib")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER}  /SAFESEH:NO")
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}  /ignore:4099 /NODEFAULTLIB:libcmt.lib ")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER}  /SAFESEH:NO ")
 
 endif(MSVC)
 
@@ -75,10 +75,6 @@ find_package(Boost REQUIRED COMPONENTS regex thread system locale context corout
 include_directories(${OPENSSL_INCLUDE_DIR})
 link_libraries(${OPENSSL_LIBRARIES})
 link_directories(${Boost_LIBRARY_DIR})
-
-if(MSVC)
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LIBPATH:${Boost_LIBRARY_DIR}")
-endif()
 
 if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
 	# For static Windows builds, we also need to pull in the Qt5 Platform
