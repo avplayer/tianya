@@ -70,7 +70,7 @@ endif()
 
 find_package(Threads)
 find_package(Qt5Widgets REQUIRED)
-find_package(Boost REQUIRED COMPONENTS regex thread system locale context coroutine)
+find_package(Boost REQUIRED COMPONENTS regex thread system locale context coroutine date_time)
 
 include_directories(${OPENSSL_INCLUDE_DIR})
 link_libraries(${OPENSSL_LIBRARIES})
