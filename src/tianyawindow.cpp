@@ -97,7 +97,7 @@ void TianyaWindow::real_start_tianya()
 		QString statusmessage = QStringLiteral("已更新到 %1 条").arg(m_tianya_data_mode.rowCount());
 
 		QMetaObject::invokeMethod(&m_tianya_data_mode, "update_tianya_list", Qt::BlockingQueuedConnection, ret, Q_ARG(list_info, hits_info));
-		QMetaObject::invokeMethod(statusBar(), "showMessage", Qt::AutoConnection, ret, Q_ARG(QString, statusmessage));
+		QMetaObject::invokeMethod(statusBar(), "showMessage", Qt::BlockingQueuedConnection, ret, Q_ARG(QString, statusmessage));
 
 		post_on_gui_thread([this, hits_info]()
 		{
