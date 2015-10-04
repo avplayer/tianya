@@ -92,18 +92,18 @@ void TianyaWindow::real_start_tianya()
 {
 	m_tianya.connect_hit_item_fetched([this](const list_info& hits_info)
 	{
+		QGenericReturnArgument ret;
+
+		QString statusmessage = QStringLiteral("已更新到 %1 条").arg(m_tianya_data_mode.rowCount());
+
+		QMetaObject::invokeMethod(&m_tianya_data_mode, "update_tianya_list", Qt::BlockingQueuedConnection, ret, Q_ARG(list_info, hits_info));
+		QMetaObject::invokeMethod(statusBar(), "showMessage", Qt::AutoConnection, ret, Q_ARG(QString, statusmessage));
+
 		post_on_gui_thread([this, hits_info]()
 		{
 			if (m_fist_insertion)
 				QTimer::singleShot(300, this, SLOT(timer_adjust_Column()));
 			m_fist_insertion = false;
-
-			m_tianya_data_mode.update_tianya_list(hits_info);
-
-			// 更新状态栏
-			statusBar()->showMessage(QStringLiteral("已更新到 %1 条").arg(m_tianya_data_mode.rowCount()));
-
-
 		});
 	});
 

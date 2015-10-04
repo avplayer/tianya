@@ -13,7 +13,7 @@ public:
     explicit TianyaModel(QObject* parent = 0);
 	virtual ~TianyaModel(){}
 
-	void update_tianya_list(const list_info& hits_info);
+	Q_INVOKABLE void update_tianya_list(const list_info& hits_info);
 
 public:
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
