@@ -2,11 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project(tianya)
 
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag(-std=c++14 HAS_CXX14)
-if (HAS_CXX14)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 ")
-endif()
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(ENABLE_QT_STATIC "link to static qt" ON)
 
