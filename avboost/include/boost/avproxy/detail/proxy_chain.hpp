@@ -5,9 +5,7 @@
 #include <boost/asio/io_service.hpp>
 
 namespace avproxy {
-
 class proxy_chain;
-
 namespace detail {
 
 	// 为proxy_chian提供便利的添加语法的辅助类.
@@ -28,24 +26,85 @@ namespace detail {
 	private:
 		proxy_chain * chain;
 	};
-
-	class proxy_base;
 }
 
-class proxy_chain {
+
+namespace detail{
+	class proxy_wrapper;
+	class proxy_type_erasure_base
+	{
+	public:
+		typedef std::function< void (const boost::system::error_code&) > handler_type;
+		friend class proxy_wrapper;
+
+	private:
+		virtual void async_connect(handler_type) = 0;
+	};
+
+	template<class RealProxy>
+	class proxy_adaptor : public proxy_type_erasure_base
+	{
+		friend class proxy_wrapper;
+		proxy_adaptor(const RealProxy & realproxy)
+			: realobj(realproxy)
+		{
+		}
+
+		proxy_adaptor(RealProxy && realproxy)
+			: realobj(realproxy)
+		{
+		}
+
+		virtual void async_connect(proxy_type_erasure_base::handler_type handler) override
+		{
+			realobj.async_connect(handler);
+		}
+		RealProxy realobj;
+	};
+
+	class proxy_wrapper
+	{
+	public:
+		proxy_wrapper(const proxy_wrapper& other) = default;
+		proxy_wrapper(proxy_wrapper&& other) = default;
+
+		proxy_wrapper& operator=(const proxy_wrapper& other) = default;
+		proxy_wrapper& operator=(proxy_wrapper&& other) = default;
+
+		template<typename RealProxy, typename std::enable_if<!std::is_same<typename std::decay<RealProxy>::type, proxy_wrapper>::value, int>::type = 0 >
+		proxy_wrapper(RealProxy&& realproxy)
+		{
+			_impl.reset(new proxy_adaptor<typename std::remove_reference<RealProxy>::type>(realproxy));
+		}
+
+		template<typename RealProxy, typename std::enable_if<!std::is_same<typename std::decay<RealProxy>::type, proxy_wrapper>::value, int>::type = 0 >
+		proxy_wrapper(const RealProxy& realproxy)
+		{
+			_impl.reset(new proxy_adaptor<typename std::remove_reference<RealProxy>::type>(realproxy));
+		}
+
+	public:
+		template<class Handler>
+		void async_connect(Handler handler){
+			_impl->async_connect(handler);
+		}
+
+	private:
+		std::shared_ptr<proxy_type_erasure_base> _impl;
+	};
+
+}
+
+class proxy_chain : public std::vector<detail::proxy_wrapper>
+{
 public:
 	proxy_chain(boost::asio::io_service& _io):io_(_io){}
+	proxy_chain(proxy_chain&& other) = default;
+	proxy_chain(const proxy_chain& other) = default;
 
-	detail::proxy_base * back(){
-		return m_chain.back().get();
-	}
-	
-	// 克隆一个自己，然后弹出第一个元素.
-	// 也就是克隆一个少一个元素的 proxy_chain
-	proxy_chain clone_poped(){
-		proxy_chain p(*this);
-		p.m_chain.pop_back();
-		return p;
+	void pop_front()
+	{
+		erase(begin());
 	}
 
 	detail::proxychain_adder add(){
@@ -53,57 +112,27 @@ public:
 	}
 
 	template<class Proxy>
-	proxy_chain  add(const Proxy & proxy)
+	proxy_chain add(const Proxy & proxy)
 	{
-		// 拷贝构造一个新的.
-		detail::proxy_base * newproxy = new Proxy(proxy);
-		add_proxy_base(newproxy);
+		push_back(proxy);
 		return *this;
 	}
 
 	boost::asio::io_service& get_io_service(){
 		return io_;
 	}
-protected:
-	void add_proxy_base(detail::proxy_base * proxy){
-		m_chain.insert(m_chain.begin(), boost::shared_ptr<detail::proxy_base>(proxy) );
-	}
+
 private:
 	boost::asio::io_service&	io_;
-	std::vector<boost::shared_ptr<detail::proxy_base> > m_chain;
-
 	friend struct detail::proxychain_adder;
 };
 
-namespace detail{
-	class proxy_base {
-	public:
-		typedef boost::function< void (const boost::system::error_code&) > handler_type;
-	public:
-		template<class Handler>
-		void resolve(Handler handler, proxy_chain subchain){
-			_resolve(handler_type(handler), subchain);
-		}
-		
-		template<class Handler>
-		void handshake(Handler handler,proxy_chain subchain){
-			_handshake(handler_type(handler), subchain);
-		}
-
-		virtual ~proxy_base(){}
-
-	private:
-		virtual void _resolve(handler_type, proxy_chain subchain) = 0;
-		virtual void _handshake(handler_type, proxy_chain subchain) = 0;
-	};
-}
 
 template<class Proxy>
 detail::proxychain_adder detail::proxychain_adder::operator()( const Proxy & proxy )
 {
 	// 拷贝构造一个新的.
-	proxy_base * newproxy = new Proxy(proxy);
-	chain->add_proxy_base(newproxy);
+	chain->add(proxy);
 	return *this;
 }
 

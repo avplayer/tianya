@@ -18,8 +18,10 @@ namespace proxy{
 
 // 使用　socks5代理 发起连接.
 // TODO, 添加认证支持.
-class socks5 : public  avproxy::detail::proxy_base , boost::asio::coroutine{
+class socks5 : boost::asio::coroutine
+{
 public:
+	typedef std::function< void (const boost::system::error_code&) > handler_type;
 	typedef boost::asio::ip::tcp::resolver::query query;
 	typedef boost::asio::ip::tcp::socket socket;
 	typedef void result_type;
@@ -29,19 +31,13 @@ public:
 	{
 
 	}
-private:
-	void _resolve(handler_type handler, proxy_chain subchain){
-		// 执行下层　proxy 的链接，通常是　tcp
-		// TODO: 将这里的错误从　connection-refuse 改成　　proxy_connectio_refuse
-		handler_type _handler = boost::bind(detail::proxy_error_mapper<handler_type>, _1, handler);
 
-  		avproxy::async_proxy_connect(subchain, _handler);
-	}
-
-	void _handshake(handler_type handler, proxy_chain subchain ){
+	void async_connect(handler_type handler)
+	{
 		// 执行　socks5 的　handshake, 要异步哦.
-		socket_.get_io_service().post(boost::asio::detail::bind_handler(*this, boost::system::error_code(), 0, handler));
+		socket_.get_io_context().post(boost::asio::detail::bind_handler(*this, boost::system::error_code(), 0, handler));
 	}
+
 public:
 	void operator()(boost::system::error_code ec,  std::size_t length, handler_type handler)
 	{
@@ -97,7 +93,7 @@ public:
 				}
 				if (ec) break;
 			}while (false);
- 			socket_.get_io_service().post(boost::asio::detail::bind_handler(handler, ec));
+ 			socket_.get_io_context().post(boost::asio::detail::bind_handler(handler, ec));
 		}
 	}
 

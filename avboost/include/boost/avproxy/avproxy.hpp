@@ -10,7 +10,6 @@
 #endif
 
 
-#include "detail/connect_condition.hpp"
 #include "detail/proxy_chain.hpp"
 
 #include "proxy_connect.hpp"
