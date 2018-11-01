@@ -60,6 +60,7 @@ private:
 	}
 };
 
+namespace detail{
 // 带　proxy 执行连接.
 template<typename Handler>
 class async_proxy_connect_op : boost::asio::coroutine
@@ -67,7 +68,7 @@ class async_proxy_connect_op : boost::asio::coroutine
 public:
 	typedef void result_type; // for boost::bind_handler
 public:
-	async_proxy_connect_op(const proxy_chain &proxy_chain, Handler &handler)
+	async_proxy_connect_op(const proxy_chain &proxy_chain, const Handler& handler)
 		: proxy_chain_(proxy_chain)
 		, m_handler(handler)
 	{
@@ -91,6 +92,8 @@ private:
 	Handler m_handler;
 };
 
+}
+
 template <typename RealHandler>
 inline BOOST_ASIO_INITFN_RESULT_TYPE(RealHandler,
 	void(boost::system::error_code))
@@ -101,9 +104,9 @@ inline BOOST_ASIO_INITFN_RESULT_TYPE(RealHandler,
 	BOOST_ASIO_CONNECT_HANDLER_CHECK(RealHandler, handler) type_check;
 
 	boost::asio::async_completion<RealHandler, void(boost::system::error_code)>
-		init(BOOST_ASIO_MOVE_CAST(RealHandler)(handler));
+		init(handler);
 
-	async_proxy_connect_op<BOOST_ASIO_HANDLER_TYPE(
+	detail::async_proxy_connect_op<BOOST_ASIO_HANDLER_TYPE(
 		RealHandler, void(boost::system::error_code))>(proxy_chain, init.completion_handler)
 		(boost::system::error_code());
 	return init.result.get();
