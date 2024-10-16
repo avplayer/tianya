@@ -16,36 +16,42 @@
   See the LICENSE file for more details.
 */
 
-#ifndef MIMEATTACHMENT_H
-#define MIMEATTACHMENT_H
+#ifndef MIMEHTML_H
+#define MIMEHTML_H
 
-#include <QFile>
-#include "mimepart.hpp"
-#include "mimefile.hpp"
+#include "smtpmime_global.h"
+#include "mimetext.h"
 
-#include "smtpexports.hpp"
-
-class SMTP_EXPORT MimeAttachment : public MimeFile
+class SMTP_MIME_EXPORT MimeHtml : public MimeText
 {
-    Q_OBJECT
 public:
 
     /* [1] Constructors and Destructors */
 
-    MimeAttachment(QFile* file);
-    MimeAttachment(const QByteArray& stream, const QString& fileName);
-
-    ~MimeAttachment();
+    MimeHtml(const QString &html = "");
+    ~MimeHtml();
 
     /* [1] --- */
 
-protected:
 
-    /* [2] Protected methods */
+    /* [2] Getters and Setters */
 
-    virtual void prepare();
+    void setHtml(const QString & html);
+
+    QString getHtml() const;
 
     /* [2] --- */
+
+protected:
+
+    /* [3] Protected members */
+
+    /* [3] --- */
+
+
+    /* [4] Protected methods */
+
+    /* [4] --- */
 };
 
-#endif // MIMEATTACHMENT_H
+#endif // MIMEHTML_H

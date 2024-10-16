@@ -16,21 +16,12 @@
   See the LICENSE file for more details.
 */
 
-#include "emailaddress.hpp"
+#include "emailaddress.h"
 
 /* [1] Constructors and Destructors */
 
-EmailAddress::EmailAddress()
-{
-}
-
-EmailAddress::EmailAddress(const std::string & address, const std::string & name)
-{
-    this->address = address;
-    this->name = name;
-}
-
-EmailAddress::~EmailAddress()
+EmailAddress::EmailAddress(const QString & address, const QString & name)
+    : address(address), name(name)
 {
 }
 
@@ -39,23 +30,13 @@ EmailAddress::~EmailAddress()
 
 /* [2] Getters and Setters */
 
-void EmailAddress::setName(const std::string & name)
-{
-    this->name = name;
 
-}
-
-void EmailAddress::setAddress(const std::string & address)
-{
-    this->address = address;
-}
-
-const std::string & EmailAddress::getName() const
+QString EmailAddress::getName() const
 {
     return name;
 }
 
-const std::string & EmailAddress::getAddress() const
+QString EmailAddress::getAddress() const
 {
     return address;
 }

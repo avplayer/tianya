@@ -7,4 +7,4 @@ add_library(mailmime STATIC ${SRCS})
 
 target_include_directories(mailmime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(mailmime Qt5::Widgets)
+target_link_libraries(mailmime PUBLIC Qt6::Widgets)

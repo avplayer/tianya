@@ -27,6 +27,10 @@ public:
 		{
 			m_asio.post([this](){m_work.reset();});
 		});
+
+		struct sched_param param{0};
+
+		pthread_setschedparam(m_asio_thread.native_handle(), SCHED_IDLE, &param);
 	}
 
 	boost::asio::io_service& get_io_service(){return m_asio;}

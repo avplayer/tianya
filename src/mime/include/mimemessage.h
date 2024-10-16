@@ -19,14 +19,15 @@
 #ifndef MIMEMESSAGE_H
 #define MIMEMESSAGE_H
 
-#include "mimepart.hpp"
-#include "mimemultipart.hpp"
-#include "emailaddress.hpp"
-#include <QList>
+#include <QObject>
+#include <QStringList>
+#include <QTextStream>
 
-#include "smtpexports.hpp"
+#include "smtpmime_global.h"
+#include "mimepart.h"
+#include "emailaddress.h"
 
-class SMTP_EXPORT MimeMessage : public QObject
+class SMTP_MIME_EXPORT MimeMessage : public QObject
 {
 public:
 
@@ -38,7 +39,7 @@ public:
 
     /* [1] Constructors and Destructors */
 
-    MimeMessage(bool createAutoMimeConent = true);
+    MimeMessage(bool createAutoMimeContent = true);
     ~MimeMessage();
 
     /* [1] --- */
@@ -46,19 +47,24 @@ public:
 
     /* [2] Getters and Setters */
 
-    void setSender(EmailAddress e);
-    void addRecipient(EmailAddress rcpt, MimeMessage::RecipientType type = To);
-    void addTo(EmailAddress rcpt);
-    void addCc(EmailAddress rcpt);
-    void addBcc(EmailAddress rcpt);
-    void setSubject(const QString & subject);
+    void setSender(const EmailAddress &sndr);
+    void setReplyTo(const EmailAddress &repto);
+    void addRecipient(const EmailAddress &rcpt, RecipientType type = To);
+    void addTo(const EmailAddress &rcpt);
+    void addCc(const EmailAddress &rcpt);
+    void addBcc(const EmailAddress &rcpt);
+    void addCustomHeader(const QString &hdr);
+    void setSubject(const QString &subject);
     void addPart(MimePart* part);
+    void addPart(MimePart* part, const bool takeOwnership);
 
     void setHeaderEncoding(MimePart::Encoding);
 
-    const EmailAddress & getSender() const;
-    const QList< EmailAddress >& getRecipients(MimeMessage::RecipientType type = To) const;
-    const QString & getSubject() const;
+    EmailAddress getSender() const;
+    EmailAddress getReplyTo() const;
+    const QList<EmailAddress> &getRecipients(RecipientType type = To) const;
+    QString getSubject() const;
+    const QStringList &getCustomHeaders() const;
     const QList<MimePart*> & getParts() const;
 
     MimePart& getContent();
@@ -68,7 +74,8 @@ public:
 
     /* [3] Public methods */
 
-    virtual QString toString();
+    virtual QString toString() const;
+    void writeToDevice(QIODevice &device) const;
 
     /* [3] --- */
 
@@ -77,12 +84,17 @@ protected:
     /* [4] Protected members */
 
     EmailAddress sender;
+    EmailAddress replyTo;
     QList<EmailAddress> recipientsTo, recipientsCc, recipientsBcc;
     QString subject;
+    QStringList customHeaders;
     MimePart *content;
-    bool autoMimeContentCreated;
+    bool mimeContentAutoCreated;
 
     MimePart::Encoding hEncoding;
+
+    static QByteArray format(const QString &text, MimePart::Encoding encoding);
+    static QByteArray formatAddress(const EmailAddress &address, MimePart::Encoding encoding);
 
     /* [4] --- */
 

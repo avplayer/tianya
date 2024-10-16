@@ -16,28 +16,39 @@
   See the LICENSE file for more details.
 */
 
-#ifndef MIMECONTENTFORMATTER_H
-#define MIMECONTENTFORMATTER_H
+#ifndef EMAILADDRESS_H
+#define EMAILADDRESS_H
 
-#include <QObject>
-#include <QByteArray>
+#include "smtpmime_global.h"
+#include <QString>
 
-#include "smtpexports.hpp"
-
-class SMTP_EXPORT MimeContentFormatter : public QObject
+class SMTP_MIME_EXPORT EmailAddress
 {
-    Q_OBJECT
 public:
-    MimeContentFormatter (int max_length = 76);
 
-    void setMaxLength(int l);
-    int getMaxLength() const;
+    /* [1] Constructors and Destructors */
 
-    QString format(const QString &content, bool quotedPrintable = false) const;
+    EmailAddress(const QString & address = "", const QString & name = "");
 
-protected:
-    int max_length;
+    /* [1] --- */
 
+
+    /* [2] Getters and Setters */
+
+    QString getAddress() const;
+    QString getName() const;
+
+    /* [2] --- */
+
+
+private:
+
+    /* [3] Private members */
+
+    QString address;
+    QString name;
+
+    /* [3] --- */
 };
 
-#endif // MIMECONTENTFORMATTER_H
+#endif // EMAILADDRESS_H

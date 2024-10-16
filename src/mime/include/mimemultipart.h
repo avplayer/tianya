@@ -19,13 +19,12 @@
 #ifndef MIMEMULTIPART_H
 #define MIMEMULTIPART_H
 
-#include "mimepart.hpp"
+#include <QList>
+#include "smtpmime_global.h"
+#include "mimepart.h"
 
-#include "smtpexports.hpp"
-
-class SMTP_EXPORT MimeMultiPart : public MimePart
+class SMTP_MIME_EXPORT MimeMultiPart : public MimePart
 {
-    Q_OBJECT
 public:
 
     /* [0] Enums */
@@ -61,15 +60,19 @@ public:
 
     void addPart(MimePart *part);
 
-    virtual void prepare();
+    void addPart(MimePart *part, const bool takeOwnership);
+
+    void writeContent(QIODevice &device) const;
 
     /* [3] --- */
 
 protected:
     QList< MimePart* > parts;
 
-    MultiPartType type;
+    QList< MimePart* > ownedParts;
 
+    MultiPartType type;
+    
 };
 
 #endif // MIMEMULTIPART_H

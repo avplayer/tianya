@@ -16,7 +16,7 @@
   See the LICENSE file for more details.
 */
 
-#include "mimeattachment.hpp"
+#include "mimeattachment.h"
 #include <QFileInfo>
 
 /* [1] Constructors and Destructors */
@@ -24,10 +24,7 @@
 MimeAttachment::MimeAttachment(QFile *file)
     : MimeFile(file)
 {
-}
-MimeAttachment::MimeAttachment(const QByteArray& stream, const QString& fileName): MimeFile(stream, fileName)
-{
-
+    this->headerLines += "Content-disposition: attachment; filename=\"" + cName + "\"\r\n";
 }
 
 MimeAttachment::~MimeAttachment()
@@ -38,13 +35,5 @@ MimeAttachment::~MimeAttachment()
 
 
 /* [2] Protected methods */
-
-void MimeAttachment::prepare()
-{
-    this->header += "Content-disposition: attachment";
-	this->header.append("; filename=\"=?UTF-8?B?").append(cName.toUtf8().toBase64()).append("?=\"\r\n");
-
-	MimeFile::prepare();
-}
 
 /* [2] --- */

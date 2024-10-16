@@ -16,22 +16,38 @@
   See the LICENSE file for more details.
 */
 
-#pragma once
+#ifndef MIMEINLINEFILE_H
+#define MIMEINLINEFILE_H
 
-#include <QObject>
-#include <QByteArray>
+#include "smtpmime_global.h"
+#include "mimefile.h"
 
-#include "smtpexports.hpp"
-
-class SMTP_EXPORT QuotedPrintable : public QObject
+class SMTP_MIME_EXPORT MimeInlineFile : public MimeFile
 {
-    Q_OBJECT
 public:
 
-    static QString encode(const QByteArray &input);
-    static QByteArray decode(const QString &input);
+    /* [1] Constructors and Destructors */
 
-private:
-    QuotedPrintable();
+    MimeInlineFile(QFile *f);
+    ~MimeInlineFile();
+
+    /* [1] --- */
+
+
+    /* [2] Getters and Setters */
+
+    /* [2] --- */
+
+protected:
+
+    /* [3] Protected members */
+
+    /* [3] --- */
+
+
+    /* [4] Protected methods */
+
+    /* [4] --- */
 };
 
+#endif // MIMEINLINEFILE_H

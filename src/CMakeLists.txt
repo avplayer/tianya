@@ -2,7 +2,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 cmake_policy(SET CMP0020 NEW)
-add_definitions(-DQT_NO_KEYWORDS)
 
 add_subdirectory(mime/)
 add_subdirectory(smtpclient/)
@@ -12,24 +11,20 @@ configure_file(tianya.rc.in ${CMAKE_CURRENT_BINARY_DIR}/tianya.rc)
 file(GLOB SRCS model/*.cpp *.cpp *.h*)
 file(GLOB UIS *.ui)
 
-qt5_wrap_ui(UI_SRCS ${UIS})
-qt5_add_resources(RC_SRCS tianya.qrc)
-
-set(SRCS ${SRCS} ${UI_SRCS} ${RC_SRCS})
-
-add_executable(tianya WIN32 ${SRCS} dpi.manifest  ${CMAKE_CURRENT_BINARY_DIR}/tianya.rc)
+qt_add_executable(tianya ${UIS} ${SRCS} tianya.qrc dpi.manifest  ${CMAKE_CURRENT_BINARY_DIR}/tianya.rc)
 
 target_include_directories(tianya PUBLIC ${Boost_INCLUDE_DIRS})
 
-target_link_libraries(tianya libtianya mailmime smtpclient Qt5::Widgets)
+target_link_libraries(tianya  PUBLIC libtianya mailmime smtpclient)
 
-# target_link_libraries(tianya OPENS)
+target_link_libraries(tianya PUBLIC Qt6::Widgets)
 
-target_link_libraries(tianya  ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+set_target_properties(tianya PROPERTIES
+    WIN32_EXECUTABLE ON
+    MACOSX_BUNDLE ON
+)
 
-if(WIN32 AND MSVC AND ENABLE_QT_STATIC)
-	target_link_libraries(tianya ${Qt5StaticExtra})
-endif()
+target_link_libraries(tianya PUBLIC  ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if(MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFESTINPUT:${CMAKE_CURRENT_SOURCE_DIR}/dpi.manifest")

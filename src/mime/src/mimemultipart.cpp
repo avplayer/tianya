@@ -16,9 +16,11 @@
   See the LICENSE file for more details.
 */
 
-#include "mimemultipart.hpp"
+#include "mimemultipart.h"
+#include <QIODevice>
 #include <QTime>
 #include <QCryptographicHash>
+#include <QRandomGenerator>
 
 const QString MULTI_PART_NAMES[] = {
     "multipart/mixed",         //    Mixed
@@ -37,36 +39,46 @@ MimeMultiPart::MimeMultiPart(MultiPartType type)
     this->cEncoding = _8Bit;
 
     QCryptographicHash md5(QCryptographicHash::Md5);
-    md5.addData(QByteArray().append(qrand()));
+    md5.addData(QByteArray().append(QRandomGenerator::global()->generate64()));
     cBoundary = md5.result().toHex();
 }
 
 MimeMultiPart::~MimeMultiPart() {
-
+    foreach (MimePart *part, ownedParts) {
+        delete part;
+    }
 }
 
 void MimeMultiPart::addPart(MimePart *part) {
+    this->addPart(part, false);
+}
+
+void MimeMultiPart::addPart(MimePart *part, const bool takeOwnership) {
     parts.append(part);
+    if (takeOwnership) {
+        ownedParts.append(part);
+    }
 }
 
 const QList<MimePart*> & MimeMultiPart::getParts() const {
     return parts;
 }
 
-void MimeMultiPart::prepare() {
-    QList<MimePart*>::iterator it;
+void MimeMultiPart::writeContent(QIODevice &device) const {
+    QList<MimePart*>::const_iterator it;
 
-    content = "";
-    for (it = parts.begin(); it != parts.end(); it++) {
-        content += "--" + cBoundary + "\r\n";
-        (*it)->prepare();
-        content += (*it)->toString();
+    for (it = parts.constBegin(); it != parts.constEnd(); it++) {
+        device.write("--" );
+        device.write(cBoundary.toLatin1());
+        device.write("\r\n");
+        (*it)->writeToDevice(device);
     };
 
-    content += "--" + cBoundary + "--\r\n";
-
-    MimePart::prepare();
+    device.write("--");
+    device.write(cBoundary.toLatin1());
+    device.write("--\r\n");
 }
+
 
 void MimeMultiPart::setMimeType(const MultiPartType type) {
     this->type = type;

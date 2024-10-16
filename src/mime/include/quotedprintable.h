@@ -16,41 +16,16 @@
   See the LICENSE file for more details.
 */
 
-#pragma once
+#ifndef QUOTEDPRINTABLE_H
+#define QUOTEDPRINTABLE_H
 
-#include <string>
+#include <QByteArray>
+#include <QString>
+#include "smtpmime_global.h"
 
-class EmailAddress
-{
-public:
+namespace QuotedPrintable {
+    SMTP_MIME_EXPORT QString encode(const QByteArray &input);
+    SMTP_MIME_EXPORT QByteArray decode(const QString &input);
+}
 
-    /* [1] Constructors and Destructors */
-
-    EmailAddress();
-    EmailAddress(const std::string & address, const std::string & name="");
-
-    ~EmailAddress();
-
-    /* [1] --- */
-
-
-    /* [2] Getters and Setters */
-    void setName(const std::string & name);
-    void setAddress(const std::string & address);
-
-    const std::string & getName() const;
-    const std::string & getAddress() const;
-
-    /* [2] --- */
-
-
-private:
-
-    /* [3] Private members */
-
-    std::string name;
-    std::string address;
-
-    /* [3] --- */
-};
-
+#endif // QUOTEDPRINTABLE_H
