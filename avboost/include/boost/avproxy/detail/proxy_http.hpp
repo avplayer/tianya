@@ -27,12 +27,12 @@ private:
 public:
 	typedef				void result_type;
 
-	async_safe_read_until_op(AsyncReadStream& s, 
+	async_safe_read_until_op(AsyncReadStream& s,
 		boost::asio::basic_streambuf<Allocator>& b, const std::string& delim,
 		ReadHandler handler)
 		:m_buf(b), m_stream(s), m_delim(delim), m_handler(handler)
 	{
-		m_stream.get_io_service().post(boost::bind(*this, boost::system::error_code(), 0));
+		boost::asio::post(m_stream.get_executor(), boost::bind(*this, boost::system::error_code(), 0));
 	}
 	void operator()(const boost::system::error_code & ec, std::size_t length)
 	{
@@ -42,9 +42,9 @@ public:
 			do{
 				BOOST_ASIO_CORO_YIELD boost::asio::async_read(m_stream, m_buf.prepare(1), *this);
 				if ( ec) break;
-				m_buf.commit(length);			
+				m_buf.commit(length);
 			}while(!check_delim());
-			m_stream.get_io_service().post(
+			boost::asio::post(m_stream.get_executor(),
 				boost::asio::detail::bind_handler((m_handler), ec, m_buf.size())
 			);
 		}
@@ -63,7 +63,7 @@ private:
  * 内部实现是每次读取一个字节，所以为了效率考虑请不要使用这个接口哦.
  */
 template <typename AsyncReadStream, typename Allocator, typename ReadHandler>
-void async_safe_read_until(AsyncReadStream& s, 
+void async_safe_read_until(AsyncReadStream& s,
 		boost::asio::basic_streambuf<Allocator>& b, const std::string& delim, ReadHandler handler)
 {
 	// If you get an error on the following line it means that your handler does
@@ -104,7 +104,7 @@ private:
 	// 执行　HTTP 的　handshake, 要异步哦.
 	void _handshake(handler_type handler, proxy_chain subchain ){
 
-		socket_.get_io_service().post(boost::asio::detail::bind_handler(*this, boost::system::error_code(), 0, handler));
+		boost::asio::post(socket_.get_executor(), boost::asio::detail::bind_handler(*this, boost::system::error_code(), 0, handler));
 	}
 public:
 	void operator()(boost::system::error_code ec,  std::size_t length, handler_type handler)
@@ -132,12 +132,12 @@ public:
 					ec = error::make_error_code(error::proxy_unknow_error);
 				}
 			}while (false);
- 			socket_.get_io_service().post(boost::asio::detail::bind_handler(handler, ec));
+ 			boost::asio::post(socket_.get_executor(), boost::asio::detail::bind_handler(handler, ec));
 		}
 	}
 
 	void _async_write_some(){
-		
+
 	}
 
 private:

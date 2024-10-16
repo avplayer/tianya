@@ -31,6 +31,8 @@ public:
     /* [1] Constructors and Destructors */
 
     MimeFile(QFile *f);
+    MimeFile(const QByteArray& stream, const QString& fileName);
+
     ~MimeFile();
 
     /* [1] --- */

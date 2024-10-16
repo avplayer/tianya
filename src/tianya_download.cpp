@@ -7,9 +7,9 @@
 #include <QtWidgets>
 #include <QFile>
 
-#include "mimemessage.hpp"
-#include "mimeattachment.hpp"
-#include "mimetext.hpp"
+#include "mimemessage.h"
+#include "mimeattachment.h"
+#include "mimetext.h"
 
 #include "syncobj.hpp"
 #include "tianya_download.hpp"
@@ -104,15 +104,15 @@ void tianya_download::start_send_mail(EmailAddress mail_rcpt)
 {
 	QSettings settings;
 
-	EmailAddress mail_sender(settings.value("kindle.usermail").toString().toUtf8().toStdString() , "Tianya Radar");
+	EmailAddress mail_sender(settings.value("kindle.usermail").toString(), "Tianya Radar");
 	QString password = settings.value("kindle.usermail_passwd").toString();
 
-	m_smtp.reset(new mx::smtp(m_io_service, mail_sender.getAddress(), password.toUtf8().toStdString()));
+	m_smtp.reset(new mx::smtp(m_io_service, mail_sender.getAddress().toStdString(), password.toUtf8().toStdString()));
 
 	InternetMailFormat imf;
 
-	imf.header["from"] = mail_sender.getAddress();
-	imf.header["to"] = mail_rcpt.getAddress();
+	imf.header["from"] = mail_sender.getAddress().toStdString();
+	imf.header["to"] = mail_rcpt.getAddress().toStdString();
 	imf.header["subject"] = "Convert";
 
 	std::shared_ptr<MimeMessage> message = std::make_shared<MimeMessage>();

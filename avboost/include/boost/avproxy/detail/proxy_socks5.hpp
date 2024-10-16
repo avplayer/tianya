@@ -40,7 +40,7 @@ private:
 
 	void _handshake(handler_type handler, proxy_chain subchain ){
 		// 执行　socks5 的　handshake, 要异步哦.
-		socket_.get_io_service().post(boost::asio::detail::bind_handler(*this, boost::system::error_code(), 0, handler));
+		boost::asio::post(socket_.get_executor(), boost::asio::detail::bind_handler(*this, boost::system::error_code(), 0, handler));
 	}
 public:
 	void operator()(boost::system::error_code ec,  std::size_t length, handler_type handler)
@@ -97,7 +97,7 @@ public:
 				}
 				if (ec) break;
 			}while (false);
- 			socket_.get_io_service().post(boost::asio::detail::bind_handler(handler, ec));
+			boost::asio::post(socket_.get_executor(), boost::asio::detail::bind_handler(handler, ec));
 		}
 	}
 

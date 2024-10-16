@@ -29,7 +29,7 @@ int main()
 	// avproxy::autoproxychain 支持环境变量　socks5_proxy/ http_proxy， 要更精确的控制，请自己构建
 	// proxychain 做为参数.
 	avproxy::async_proxy_connect(
-		avproxy::autoproxychain(msocket, avproxy::proxy::tcp::query("www.google.com", "81")),
+		avproxy::autoproxychain(io_service, msocket, avproxy::proxy::tcp::query("www.google.com", "81")),
 		boost::bind(&connected, boost::asio::placeholders::error, boost::ref(msocket))
 	);
 	io_service.run();

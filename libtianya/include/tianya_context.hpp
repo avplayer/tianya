@@ -11,6 +11,7 @@
 #include <memory>
 #include <functional>
 #include <atomic>
+#include <iostream>
 
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/regex.hpp>
@@ -79,7 +80,7 @@ public:
 						{
 							if (!process_handle(yield, ui))
 								m_download_complete();
-						});
+						}, [](std::exception_ptr){});
 					}
 				});
 			}

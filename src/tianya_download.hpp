@@ -6,7 +6,7 @@
 #include <tianya_context.hpp>
 #include <tianya_list.hpp>
 
-#include "emailaddress.hpp"
+#include "emailaddress.h"
 #include "smtpclient/smtp.hpp"
 
 class tianya_download : public QObject

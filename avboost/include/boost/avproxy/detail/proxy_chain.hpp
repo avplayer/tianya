@@ -34,12 +34,12 @@ namespace detail {
 
 class proxy_chain {
 public:
-	proxy_chain(boost::asio::io_service& _io):io_(_io){}
+	proxy_chain(boost::asio::io_context& _io):io_(_io){}
 
 	detail::proxy_base * back(){
 		return m_chain.back().get();
 	}
-	
+
 	// 克隆一个自己，然后弹出第一个元素.
 	// 也就是克隆一个少一个元素的 proxy_chain
 	proxy_chain clone_poped(){
@@ -84,7 +84,7 @@ namespace detail{
 		void resolve(Handler handler, proxy_chain subchain){
 			_resolve(handler_type(handler), subchain);
 		}
-		
+
 		template<class Handler>
 		void handshake(Handler handler,proxy_chain subchain){
 			_handshake(handler_type(handler), subchain);

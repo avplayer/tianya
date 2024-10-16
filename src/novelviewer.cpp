@@ -203,7 +203,7 @@ void NovelViewer::save_to_file(QString filename)
 void NovelViewer::mail_to()
 {
 	QSettings settings;
-	EmailAddress mail_rcpt(settings.value("kindle.kindlemail").toString().toUtf8().toStdString());
+	EmailAddress mail_rcpt(settings.value("kindle.kindlemail").toString());
 
 	auto progress_bar = new QProgressBar(this);
 

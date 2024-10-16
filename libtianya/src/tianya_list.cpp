@@ -1,4 +1,6 @@
 ﻿
+#include <iostream>
+
 #include "tianya_list.hpp"
 
 void tianya_list::process_handle(boost::asio::yield_context& yield, const url_info& ui)

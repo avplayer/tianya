@@ -69,7 +69,7 @@ public:
 						[this, ui](boost::asio::yield_context yield)
 						{
 							process_handle(yield, ui);
-						});
+						}, [](std::exception_ptr){});
 					}
 				});
 			}
@@ -147,7 +147,7 @@ protected:
 	void process_handle(boost::asio::yield_context& yield, const url_info& ui);
 
 private:
-	boost::asio::io_service& m_io_service;
+	boost::asio::io_context& m_io_service;
 	tcp::socket m_socket;
 	tcp::resolver m_resolver;
 	boost::asio::streambuf m_request;

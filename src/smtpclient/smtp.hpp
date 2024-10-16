@@ -81,7 +81,7 @@ public:
 					  Handler handler )
 		: m_socket( socket ), m_readbuf( _readbuf ), m_rcpts( _rcpts ), m_handler( handler ), m_writebuf(new boost::asio::streambuf)
 	{
-		socket.get_io_service().post( boost::asio::detail::bind_handler( *this, boost::system::error_code(), 0 ) );
+		boost::asio::post(socket.get_executor(), boost::asio::detail::bind_handler( *this, boost::system::error_code(), 0 ) );
 	}
 
 	void operator()( boost::system::error_code ec, std::size_t bytetransfered )
@@ -154,7 +154,7 @@ public:
 				ec.clear();
 			}
 
-			m_socket.get_io_service().post( boost::asio::detail::bind_handler( m_handler, ec, sended_rcpt ) );
+			boost::asio::post(m_socket.get_executor(), boost::asio::detail::bind_handler( m_handler, ec, sended_rcpt ) );
 		}
 	}
 
@@ -186,8 +186,8 @@ void send_rcpt_tos( socket_type & socket,
 
 class smtp
 {
-	boost::asio::io_service & io_service;
-	boost::asio::io_service::work m_work;
+	boost::asio::io_context & io_service;
+	boost::asio::io_context::work m_work;
 	std::string m_mailaddr, m_passwd, m_mailserver;
 	std::string m_AUTH;
 	InternetMailFormat m_imf;
@@ -271,7 +271,7 @@ public:
 
 			// 首先链接到服务器. dns 解析并连接.
 			BOOST_ASIO_CORO_YIELD avproxy::async_proxy_connect(
-				avproxy::autoproxychain( *m_socket, m_mailserver_query ),
+				avproxy::autoproxychain(io_service, *m_socket, m_mailserver_query ),
 				std::bind( *this, std::placeholders::_1, 0, handler, coro ) );
 
 			m_readbuf.reset( new boost::asio::streambuf );

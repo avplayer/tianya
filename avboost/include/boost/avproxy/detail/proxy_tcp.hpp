@@ -18,7 +18,7 @@ public:
 private:
 	void _resolve(handler_type handler, proxy_chain subchain){
 		//handler(boost::system::error_code());
-		socket_.get_io_service().post(boost::asio::detail::bind_handler(handler, boost::system::error_code()));
+		boost::asio::post(socket_.get_executor(), boost::asio::detail::bind_handler(handler, boost::system::error_code()));
 	}
 
 	void _handshake(handler_type handler, proxy_chain subchain ){

@@ -32,9 +32,12 @@ smtp::smtp( boost::asio::io_service& _io_service, std::string user, std::string 
 	boost::cmatch what;
 
 	if( boost::regex_search( m_mailserver.c_str(), what, boost::regex( "(.*):([0-9]+)" ) ) ) {
-		m_mailserver_query = boost::asio::ip::tcp::resolver::query( what[1].str(), what[2].str() );
+		m_mailserver_query.~basic_resolver_query();
+
+		std::construct_at(&m_mailserver_query, what[1].str(), what[2].str() );
 	} else {
-		m_mailserver_query = boost::asio::ip::tcp::resolver::query( m_mailserver, "25" );
+		m_mailserver_query.~basic_resolver_query();
+		std::construct_at(&m_mailserver_query, m_mailserver, "25" );
 	}
 }
 

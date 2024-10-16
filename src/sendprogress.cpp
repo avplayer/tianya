@@ -44,7 +44,7 @@ void SendProgress::start_sendmail()
 
 	QSettings settings;
 
-	EmailAddress mail_rcpt(settings.value("kindle.kindlemail").toString().toUtf8().toStdString());
+	EmailAddress mail_rcpt(settings.value("kindle.kindlemail").toString());
 
 	QObject::connect(&m_tianya_download, SIGNAL(mailsend_progress_report(double)), this, SLOT(set_send_work_percent(double)));
 	QObject::connect(&m_tianya_download, SIGNAL(send_complete()), this, SLOT(mail_sended()));

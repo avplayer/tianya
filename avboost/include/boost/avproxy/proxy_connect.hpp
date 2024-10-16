@@ -5,14 +5,7 @@
 #pragma GCC diagnostic ignored "-Wdangling-else"
 #endif
 
-#include <boost/bind.hpp>
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/detail/handler_alloc_helpers.hpp>
-#include <boost/asio/detail/handler_cont_helpers.hpp>
-#include <boost/asio/detail/handler_invoke_helpers.hpp>
-#include <boost/asio/detail/handler_type_requirements.hpp>
-#include <boost/asio/async_result.hpp>
+#include <boost/asio.hpp>
 
 #include "detail/proxy_chain.hpp"
 
@@ -52,7 +45,7 @@ public:
 		BOOST_ASIO_CORO_REENTER(this)
 		{
 			BOOST_ASIO_CORO_YIELD boost::asio::async_connect(socket,begin, _connect_condition, boost::bind(*this, _1, _2, boost::ref(socket), resolver, handler, _connect_condition));
-			socket.get_io_service().post(boost::asio::detail::bind_handler(handler,ec));
+			boost::asio::post(socket.get_executor(), boost::asio::detail::bind_handler(handler,ec));
 		}
 	}
 private:
@@ -64,7 +57,7 @@ private:
 		typedef typename Socket::protocol_type::resolver resolver_type;
 
 		boost::shared_ptr<resolver_type>
-			resolver(new resolver_type(socket.get_io_service()));
+			resolver(new resolver_type(socket.get_executor()));
 		resolver->async_resolve(_query, boost::bind(*this, _1, _2, boost::ref(socket), resolver, handler, _connect_condition));
 	}
 };
@@ -82,7 +75,7 @@ public:
 	{
 	}
 
-	void operator()(boost::system::error_code ec)
+	void operator()(boost::system::error_code ec = {})
 	{
 		BOOST_ASIO_CORO_REENTER(this)
 		{
@@ -98,23 +91,25 @@ private:
 	Handler m_handler;
 };
 
+struct initiate_do_async_proxy_connect
+{
+	template<typename Handler>
+	void operator()(Handler&& handler, const proxy_chain *proxy_chain) const
+	{
+		async_proxy_connect_op<Handler>(*proxy_chain, handler)();
+	}
+
+};
+
 template <typename RealHandler>
-inline BOOST_ASIO_INITFN_RESULT_TYPE(RealHandler,
-	void(boost::system::error_code))
-	async_proxy_connect(const proxy_chain &proxy_chain, BOOST_ASIO_MOVE_ARG(RealHandler) handler)
+auto async_proxy_connect(const proxy_chain &proxy_chain, BOOST_ASIO_MOVE_ARG(RealHandler) handler)
 {
 	using namespace boost::asio;
 
 	BOOST_ASIO_CONNECT_HANDLER_CHECK(RealHandler, handler) type_check;
 
-	boost::asio::detail::async_result_init<
-		RealHandler, void(boost::system::error_code)> init(
-		BOOST_ASIO_MOVE_CAST(RealHandler)(handler));
-
-	async_proxy_connect_op<BOOST_ASIO_HANDLER_TYPE(
-		RealHandler, void(boost::system::error_code))>(proxy_chain, init.handler)
-		(boost::system::error_code());
-	return init.result.get();
+	return boost::asio::async_initiate<RealHandler, void(boost::system::error_code)>(
+		initiate_do_async_proxy_connect{}, handler, &proxy_chain);
 
 }
 

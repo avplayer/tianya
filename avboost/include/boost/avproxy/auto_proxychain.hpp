@@ -39,9 +39,9 @@ static boost::asio::ip::tcp::resolver::query queryfromstr(std::string str)
 // accourding to env variables http_proxy and socks5_proxy
 // to use socks5 proxy, set socks5_proxy="host:port"
 template<class Socket>
-proxy_chain autoproxychain(Socket & socket,const typename Socket::protocol_type::resolver::query & _query)
+proxy_chain autoproxychain(boost::asio::io_context& io, Socket & socket,const typename Socket::protocol_type::resolver::query & _query)
 {
-	proxy_chain _proxychain(socket.get_io_service());
+	proxy_chain _proxychain(io);
 	if (std::getenv("socks5_proxy"))
 	{ // add socks5_proxy
 		_proxychain.add(proxy::tcp(socket, detail::queryfromstr(std::getenv("socks5_proxy"))));
